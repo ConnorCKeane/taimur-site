@@ -70,7 +70,7 @@ export default function Navigation() {
           ))}
           <button
             onClick={() => setIsContactOpen(true)}
-            className="rounded-md bg-[#F04C3E] px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F04C3E] transition-colors"
+            className="rounded-md bg-transparent px-3 py-1.5 text-sm font-semibold text-[#F04C3E] border border-[#F04C3E] shadow-[0_0_10px_rgba(240,76,62,0.2)] hover:shadow-[0_0_15px_rgba(240,76,62,0.3)] transition-all"
           >
             Contact
           </button>

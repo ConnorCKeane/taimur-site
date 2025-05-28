@@ -42,10 +42,10 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="mx-auto max-w-5xl px-4 flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
+        <div className="mx-auto max-w-5xl px-6 flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
           {/* Content */}
           <motion.div 
-            className="w-full lg:w-1/2 flex flex-col justify-center space-y-8 relative"
+            className="w-full lg:w-1/2 flex flex-col justify-center space-y-8 relative text-center lg:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -57,30 +57,30 @@ export default function Home() {
                 Whether you&apos;re a beginner or advanced player, discover your potential with expert guidance.
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
+            <div className="space-y-6">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
                 <div className="flex-shrink-0">
-                  <Users className="h-7 w-7 text-[#1a202c]" />
+                  <Users className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div>
+                <div className="text-center lg:text-left">
                   <h3 className="text-base font-semibold text-gray-900">20+ Active Students</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Join a community of dedicated learners achieving their musical goals through personalized instruction.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
                 <div className="flex-shrink-0">
-                  <Award className="h-7 w-7 text-[#1a202c]" />
+                  <Award className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div>
+                <div className="text-center lg:text-left">
                   <h3 className="text-base font-semibold text-gray-900">15+ Years of Experience</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Benefit from expert instruction honed over a decade of teaching and performing.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
                 <div className="flex-shrink-0">
-                  <Clock className="h-7 w-7 text-[#1a202c]" />
+                  <Clock className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div>
+                <div className="text-center lg:text-left">
                   <h3 className="text-base font-semibold text-gray-900">250+ Hours Teaching</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Extensive hands-on experience delivering thousands of hours of personalized guitar lessons.</p>
                 </div>
@@ -125,39 +125,21 @@ export default function Home() {
         transition={{ duration: 0.5, delay: 0.4 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
-          <h2 className="text-center text-2xl font-bold text-[#F04C3E] mb-8">Our Partners</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <h2 className="text-center text-2xl font-bold text-[#F04C3E] mb-8 sm:mb-12">Our Partners</h2>
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 md:gap-12">
             {/* School of Rock */}
-            <div className="relative w-full">
-              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
-              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
-                <div className="flex flex-col items-center gap-4">
-                  <Image src="/school-of-rock-logo.png" alt="School of Rock" width={48} height={48} className="h-12 w-auto object-contain" />
-                  <p className="text-gray-900 text-center">Official Guitar Instructor</p>
-                </div>
-              </div>
+            <div className="flex justify-center">
+              <Image src="/schoolofrock-logo.png" alt="School of Rock" width={120} height={48} className="h-8 sm:h-10 md:h-12 w-auto object-contain" />
             </div>
 
-            {/* Music Store */}
-            <div className="relative w-full">
-              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
-              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
-                <div className="flex flex-col items-center gap-4">
-                  <Image src="/music-store-logo.png" alt="Local Music Store" width={48} height={48} className="h-12 w-auto object-contain" />
-                  <p className="text-gray-900 text-center">Preferred Music Store</p>
-                </div>
-              </div>
+            {/* Wylde Audio */}
+            <div className="flex justify-center">
+              <Image src="/Wylde-Audio-logo.png" alt="Wylde Audio" width={120} height={48} className="h-8 sm:h-10 md:h-12 w-auto object-contain" />
             </div>
 
-            {/* Recording Studio */}
-            <div className="relative w-full">
-              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
-              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
-                <div className="flex flex-col items-center gap-4">
-                  <Image src="/studio-logo.png" alt="Recording Studio" width={48} height={48} className="h-12 w-auto object-contain" />
-                  <p className="text-gray-900 text-center">Recording Partner</p>
-                </div>
-              </div>
+            {/* Tagima */}
+            <div className="flex justify-center">
+              <Image src="/Logo-Tagima.png" alt="Tagima" width={180} height={72} className="h-10 sm:h-12 md:h-16 w-auto object-contain" />
             </div>
           </div>
         </div>
