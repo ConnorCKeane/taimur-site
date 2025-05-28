@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import ContactDialog from '@/components/ContactDialog';
 import { motion } from 'framer-motion';
+import InstagramReel from '@/components/InstagramReel';
 
 export default function Home() {
   const [showScrollButton, setShowScrollButton] = useState(true);
@@ -35,15 +36,20 @@ export default function Home() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <motion.div
-        className="relative bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 pt-30 pb-12"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
+        className="relative bg-gradient-to-br from-gray-100 via-gray-200 to-gray-200 pt-30 pb-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="mx-auto max-w-5xl px-4 flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-16">
+        <div className="mx-auto max-w-5xl px-4 flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
           {/* Content */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-8">
-            <div>
+          <motion.div 
+            className="w-full lg:w-1/2 flex flex-col justify-center space-y-8 relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="relative z-10">
               <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">Mastering the Guitar</h1>
               <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2">With Taimur Masud</h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3">
@@ -93,35 +99,65 @@ export default function Home() {
                 Get In Touch <span aria-hidden="true">→</span>
               </button>
             </div>
-          </div>
+          </motion.div>
           {/* Image */}
-          <div className="w-full lg:w-1/2 flex justify-center items-stretch">
+          <motion.div 
+            className="w-full lg:w-1/2 flex justify-center items-stretch"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <div className="flex flex-col justify-between h-full">
-              <div className="relative aspect-[9/16] w-56 sm:w-72 lg:w-80 rounded-2xl overflow-hidden shadow-lg bg-gray-300 flex flex-col items-center justify-center border-2 border-background">
-                <span className="text-gray-500 text-lg font-semibold">Instagram Reels Placeholder</span>
-                <span className="text-gray-400 text-sm mt-2">Taimur&apos;s latest posts will appear here</span>
+              <div className="relative">
+                <InstagramReel />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* Collaborators Section */}
+      {/* Partnerships Section */}
       <motion.div
-        className="bg-background py-16"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
+        className="bg-background py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
       >
-        <div className="mx-auto max-w-4xl px-6 lg:px-8">
-          <h2 className="text-center text-2xl font-bold text-[#F04C3E] mb-8">Proudly Collaboratoring With:</h2>
-          <div className="flex items-center justify-center gap-8 overflow-x-auto py-4">
-            {/* Placeholder logos - replace src with real logos as needed */}
-            <img src="/logo-placeholder.png" alt="Logo 1" className="h-16 w-auto grayscale opacity-80" />
-            <img src="/logo-placeholder.png" alt="Logo 2" className="h-16 w-auto grayscale opacity-80" />
-            <img src="/logo-placeholder.png" alt="Logo 3" className="h-16 w-auto grayscale opacity-80" />
-            <img src="/logo-placeholder.png" alt="Logo 4" className="h-16 w-auto grayscale opacity-80" />
-            <img src="/logo-placeholder.png" alt="Logo 5" className="h-16 w-auto grayscale opacity-80" />
+        <div className="mx-auto max-w-5xl px-6 lg:px-8">
+          <h2 className="text-center text-2xl font-bold text-[#F04C3E] mb-8">Our Partners</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* School of Rock */}
+            <div className="relative w-full">
+              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
+              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
+                <div className="flex flex-col items-center gap-4">
+                  <img src="/school-of-rock-logo.png" alt="School of Rock" className="h-12 object-contain" />
+                  <p className="text-gray-900 text-center">Official Guitar Instructor</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Music Store */}
+            <div className="relative w-full">
+              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
+              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
+                <div className="flex flex-col items-center gap-4">
+                  <img src="/music-store-logo.png" alt="Local Music Store" className="h-12 object-contain" />
+                  <p className="text-gray-900 text-center">Preferred Music Store</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recording Studio */}
+            <div className="relative w-full">
+              <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
+              <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
+                <div className="flex flex-col items-center gap-4">
+                  <img src="/studio-logo.png" alt="Recording Studio" className="h-12 object-contain" />
+                  <p className="text-gray-900 text-center">Recording Partner</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -130,9 +166,9 @@ export default function Home() {
       <motion.div
         id="features-section"
         className="bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 py-20"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.4 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
           <div className="mx-auto text-center mb-12">
