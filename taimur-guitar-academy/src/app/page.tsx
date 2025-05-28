@@ -2,6 +2,7 @@
 
 import { Users, Clock, Award, ChevronDown, Instagram } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import ContactDialog from '@/components/ContactDialog';
 import { motion } from 'framer-motion';
@@ -36,7 +37,7 @@ export default function Home() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <motion.div
-        className="relative bg-gradient-to-br from-gray-100 via-gray-200 to-gray-200 pt-30 pb-12"
+        className="relative bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 pt-30 pb-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -131,7 +132,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
               <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
                 <div className="flex flex-col items-center gap-4">
-                  <img src="/school-of-rock-logo.png" alt="School of Rock" className="h-12 object-contain" />
+                  <Image src="/school-of-rock-logo.png" alt="School of Rock" width={48} height={48} className="h-12 w-auto object-contain" />
                   <p className="text-gray-900 text-center">Official Guitar Instructor</p>
                 </div>
               </div>
@@ -142,7 +143,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
               <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
                 <div className="flex flex-col items-center gap-4">
-                  <img src="/music-store-logo.png" alt="Local Music Store" className="h-12 object-contain" />
+                  <Image src="/music-store-logo.png" alt="Local Music Store" width={48} height={48} className="h-12 w-auto object-contain" />
                   <p className="text-gray-900 text-center">Preferred Music Store</p>
                 </div>
               </div>
@@ -153,7 +154,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-[#F04C3E] blur-xl opacity-20 rounded-xl"></div>
               <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-white/20">
                 <div className="flex flex-col items-center gap-4">
-                  <img src="/studio-logo.png" alt="Recording Studio" className="h-12 object-contain" />
+                  <Image src="/studio-logo.png" alt="Recording Studio" width={48} height={48} className="h-12 w-auto object-contain" />
                   <p className="text-gray-900 text-center">Recording Partner</p>
                 </div>
               </div>
@@ -179,7 +180,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
             <div className="flex-shrink-0 flex flex-col items-center">
-              <img src="/taimur-kid.png" alt="Taimur as a kid with guitar" className="w-56 h-56 object-cover rounded-full border-4 border-[#F04C3E] shadow-2xl mb-6" />
+              <Image src="/taimur-kid.png" alt="Taimur as a kid with guitar" width={224} height={224} className="w-56 h-56 object-cover rounded-full border-4 border-[#F04C3E] shadow-2xl mb-6" />
               <a href="https://instagram.com/taimurmasud" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#F04C3E] font-bold text-lg bg-[#F04C3E]/10 px-4 py-2 rounded-full shadow hover:bg-[#F04C3E]/10 transition mb-2">
                 <Instagram className="w-7 h-7" />
                 @taimurmasud

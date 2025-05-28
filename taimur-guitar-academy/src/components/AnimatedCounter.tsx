@@ -18,7 +18,7 @@ export default function AnimatedCounter({ value, duration = 2, className = '' }:
       ([entry]) => {
         if (entry.isIntersecting) {
           spring.set(0);
-          spring.set(value, { duration: duration * 1000 });
+          spring.set(value);
         }
       },
       { threshold: 0.1 }
