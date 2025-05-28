@@ -1,43 +1,48 @@
 'use client';
 
-import { Users, Clock, Award, ChevronDown, Instagram } from 'lucide-react';
+import { Users, Clock, Award, ChevronDown, Instagram, Users2, Eye, Heart, GraduationCap, Music, School, Mic, Video } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import ContactDialog from '@/components/ContactDialog';
 import { motion } from 'framer-motion';
 import InstagramReel from '@/components/InstagramReel';
+import PartnersCarousel from '@/components/PartnersCarousel';
 
 export default function Home() {
-  const [showScrollButton, setShowScrollButton] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
-  const scrollToFeatures = () => {
-    const featuresSection = document.getElementById('features-section');
-    if (featuresSection) {
-      featuresSection.scrollIntoView({ behavior: 'smooth' });
-      setShowScrollButton(false);
+  const scrollToAbout = () => {
+    const aboutSection = document.getElementById('about-section');
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowScrollButton(false);
-      } else {
-        setShowScrollButton(true);
+      const aboutSection = document.getElementById('about-section');
+      if (aboutSection) {
+        const rect = aboutSection.getBoundingClientRect();
+        // Show button when about section is not in view
+        const isAboutVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        setShowScrollButton(!isAboutVisible);
       }
     };
 
+    // Initial check
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-gradient-to-br from-[#E8E8E8] via-[#A4B8D8] via-[#8BA3C8] via-[#A4B8D8] to-[#E8E8E8]">
       {/* Hero Section */}
       <motion.div
-        className="relative bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 pt-30 pb-12"
+        className="relative pt-40 pb-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -54,7 +59,7 @@ export default function Home() {
               <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">Mastering the Guitar</h1>
               <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2">With Taimur Masud</h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3">
-                Whether you&apos;re a beginner or advanced player, discover your potential with expert guidance.
+                Offering high-quality guitar instruction for all levels
               </p>
             </div>
             <div className="space-y-6">
@@ -82,20 +87,20 @@ export default function Home() {
                 </div>
                 <div className="text-center lg:text-left">
                   <h3 className="text-base font-semibold text-gray-900">250+ Hours Teaching</h3>
-                  <p className="mt-0.5 text-gray-700 text-sm">Extensive hands-on experience delivering thousands of hours of personalized guitar lessons.</p>
+                  <p className="mt-0.5 text-gray-700 text-sm">Extensive hands-on experience teaching students ages 7–17 at School of Rock</p>
                 </div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
               <Link
                 href="/services"
-                className="rounded-md bg-[#1a202c] px-4 py-2 text-sm font-semibold text-white shadow hover:bg-gray-800 transition"
+                className="rounded-md bg-background px-4 py-2 text-sm font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
               >
-                Schedule a Lesson
+                Book a Lesson
               </Link>
               <button
                 onClick={() => setIsContactOpen(true)}
-                className="text-sm font-semibold text-[#1a202c] hover:underline"
+                className="text-sm font-semibold text-background hover:text-[#6B7280] transition-colors"
               >
                 Get In Touch <span aria-hidden="true">→</span>
               </button>
@@ -119,66 +124,110 @@ export default function Home() {
 
       {/* Partnerships Section */}
       <motion.div
-        className="bg-background py-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.4 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
-          <h2 className="text-center text-2xl font-bold text-[#F04C3E] mb-8 sm:mb-12">Our Partners</h2>
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 md:gap-12">
-            {/* School of Rock */}
-            <div className="flex justify-center">
-              <Image src="/schoolofrock-logo.png" alt="School of Rock" width={120} height={48} className="h-8 sm:h-10 md:h-12 w-auto object-contain" />
-            </div>
-
-            {/* Wylde Audio */}
-            <div className="flex justify-center">
-              <Image src="/Wylde-Audio-logo.png" alt="Wylde Audio" width={120} height={48} className="h-8 sm:h-10 md:h-12 w-auto object-contain" />
-            </div>
-
-            {/* Tagima */}
-            <div className="flex justify-center">
-              <Image src="/Logo-Tagima.png" alt="Tagima" width={180} height={72} className="h-10 sm:h-12 md:h-16 w-auto object-contain" />
-            </div>
-          </div>
+          <PartnersCarousel onContactClick={() => setIsContactOpen(true)} />
         </div>
       </motion.div>
 
       {/* Features Section */}
       <motion.div
-        id="features-section"
-        className="bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 py-20"
+        id="about-section"
+        className="py-20 pb-24"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.6 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
-          <div className="mx-auto text-center mb-12">
-            <h2 className="text-base font-semibold leading-7 text-[#F04C3E]">About Taimur</h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Meet Your Instructor
-            </p>
+          {/* About Me header */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2 inline-block border-b-2 border-gray-900 pb-1">About Me</h2>
           </div>
+          
           <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
             <div className="flex-shrink-0 flex flex-col items-center">
-              <Image src="/taimur-kid.png" alt="Taimur as a kid with guitar" width={224} height={224} className="w-56 h-56 object-cover rounded-full border-4 border-[#F04C3E] shadow-2xl mb-6" />
-              <a href="https://instagram.com/taimurmasud" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#F04C3E] font-bold text-lg bg-[#F04C3E]/10 px-4 py-2 rounded-full shadow hover:bg-[#F04C3E]/10 transition mb-2">
+              <Image src="/taimur-kid.png" alt="Taimur as a kid with guitar" width={224} height={224} className="w-56 h-56 object-cover rounded-full border-4 border-background shadow-2xl mb-4" />
+              <a href="https://instagram.com/taimurmasud" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 text-gray-900 font-bold text-lg mb-3">
                 <Instagram className="w-7 h-7" />
                 @taimurmasud
               </a>
-              <span className="inline-block bg-[#F04C3E]/10 text-[#F04C3E] px-4 py-2 rounded-full text-base font-bold shadow">160,000+ followers</span>
+              <div className="w-full border-t text-gray-900 mb-3"></div>
+              <div className="flex flex-col items-center gap-2">
+                <span className="inline-flex items-center gap-2 text-gray-900 font-medium">
+                  <Users2 className="w-4 h-4" />
+                  160,000+ followers
+                </span>
+                <span className="inline-flex items-center gap-2 text-gray-900 font-medium">
+                  <Eye className="w-4 h-4" />
+                  8,000,000+ views
+                </span>
+                <span className="inline-flex items-center gap-2 text-gray-900 font-medium">
+                  <Heart className="w-4 h-4" />
+                  2,000,000+ likes
+                </span>
+              </div>
             </div>
-            <div className="flex-1 text-gray-700 md:pt-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Taimur Masud</h3>
-              <ul className="list-disc list-inside space-y-2 text-lg mb-6">
-                <li>21-year-old musician & educator based in New Jersey</li>
-                <li>14+ years playing guitar, bass, and drums</li>
-                <li>2 years teaching at School of Rock (ages 5–17, all levels)</li>
-                <li>8 years of stage & performance experience</li>
-                <li>Music producer & content creator</li>
-              </ul>
-              <div className="text-lg">
+            <div className="flex-1 text-gray-700 md:pt-8 text-left px-4 md:px-0">
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                  <div className="flex-shrink-0 flex justify-center md:mt-1.5">
+                    <GraduationCap className="h-6 w-6 text-gray-900" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-base leading-relaxed">
+                      <span className="font-semibold text-gray-900">21-year-old musician & educator</span> in New Jersey, pursuing Music Education
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                  <div className="flex-shrink-0 flex justify-center md:mt-1.5">
+                    <Music className="h-6 w-6 text-gray-900" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-base leading-relaxed">
+                      <span className="font-semibold text-gray-900">14+ years</span> mastering guitar, bass, and drums
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                  <div className="flex-shrink-0 flex justify-center md:mt-1.5">
+                    <School className="h-6 w-6 text-gray-900" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-base leading-relaxed">
+                      <span className="font-semibold text-gray-900">School of Rock</span> certified instructor (ages 5–17)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                  <div className="flex-shrink-0 flex justify-center md:mt-1.5">
+                    <Mic className="h-6 w-6 text-gray-900" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-base leading-relaxed">
+                      <span className="font-semibold text-gray-900">8+ years</span> of professional performance experience
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                  <div className="flex-shrink-0 flex justify-center md:mt-1.5">
+                    <Video className="h-6 w-6 text-gray-900" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-base leading-relaxed">
+                      <span className="font-semibold text-gray-900">Music producer & content creator</span> with 160K+ followers
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 text-base text-center md:text-left">
                 <span className="font-semibold text-gray-900">Taimur&apos;s Guitar Academy</span> offers personalized guitar lessons for all ages and skill levels. Lessons are tailored to your goals, with a focus on comprehensive music knowledge and individual growth.
               </div>
             </div>
@@ -189,11 +238,12 @@ export default function Home() {
       {/* Scroll Button */}
       {showScrollButton && (
         <button
-          onClick={scrollToFeatures}
-          className="fixed bottom-8 right-8 p-3 rounded-full bg-[#1a202c] text-white shadow-lg hover:bg-gray-800 transition-all duration-300 z-50"
-          aria-label="Scroll to features section"
+          onClick={scrollToAbout}
+          className="fixed bottom-8 right-8 px-4 py-2 rounded-full bg-background text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300 z-50 flex items-center gap-2"
+          aria-label="Scroll to about section"
         >
-          <ChevronDown className="h-6 w-6" />
+          <span className="text-sm font-medium">About</span>
+          <ChevronDown className="h-4 w-4" />
         </button>
       )}
 

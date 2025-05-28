@@ -19,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} antialiased bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400`}>
+      <head>
+        <meta name="theme-color" content="#1a202c" />
+      </head>
+      <body className={`${inter.className} antialiased bg-background`}>
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

@@ -1,44 +1,38 @@
 'use client';
 
-import { useEffect } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
+import { useEffect } from 'react';
 
 interface AnimatedCounterProps {
   value: number;
+  suffix?: string;
   duration?: number;
-  className?: string;
 }
 
-export default function AnimatedCounter({ value, duration = 2, className = '' }: AnimatedCounterProps) {
-  const spring = useSpring(0, { stiffness: 50, damping: 20 });
-  const displayValue = useTransform(spring, (latest) => Math.floor(latest).toLocaleString());
+export default function AnimatedCounter({ value, suffix = '', duration = 2 }: AnimatedCounterProps) {
+  const spring = useSpring(0, {
+    stiffness: 50,
+    damping: 20,
+    duration: duration * 1000,
+  });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          spring.set(0);
-          spring.set(value);
-        }
-      },
-      { threshold: 0.1 }
-    );
+    spring.set(value);
+  }, [value, spring]);
 
-    const element = document.getElementById('counter-container');
-    if (element) {
-      observer.observe(element);
+  const displayValue = useTransform(spring, (latest) => {
+    if (latest >= 1000000) {
+      return `${(latest / 1000000).toFixed(1)}M`;
+    } else if (latest >= 1000) {
+      return `${(latest / 1000).toFixed(1)}K`;
     }
-
-    return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
-    };
-  }, [value, spring, duration]);
+    return Math.round(latest).toString();
+  });
 
   return (
-    <div id="counter-container" className={`min-w-[120px] ${className}`}>
-      <motion.span>{displayValue}</motion.span>
-    </div>
+    <motion.span>
+      {displayValue.get()}
+      {suffix}
+    </motion.span>
   );
 } 

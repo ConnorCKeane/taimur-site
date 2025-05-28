@@ -7,11 +7,11 @@
   --background-alt: #FFFFFF;
 
   /* Accents */
-  --primary: #F04C3E;
-  --primary-hover: #D74236;
+  --primary: #9CA3AF;  /* Light grey */
+  --primary-hover: #6B7280;  /* Slightly darker grey */
   --secondary: #6C6C70;
   --secondary-hover: #5A5A5D;
-  --muted-orange: #FF7A59;
+  --muted-orange: #E5E7EB;  /* Very light grey */
   --cool-blue: #3C8DBC;
   --soft-pink: #F2888B;
 
@@ -46,7 +46,14 @@
 }
 
 body {
-  background: #F5F5F5 !important;
+  background: linear-gradient(135deg, 
+    #F5F5F5 0%,
+    #F0E6E6 20%,
+    #F5E0E0 40%,
+    #F0D6D6 60%,
+    #F5E0E0 80%,
+    #F5F5F5 100%
+  ) !important;
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;

@@ -7,7 +7,7 @@ interface GuitarParallaxIconProps {
   opacity?: number;
 }
 
-export default function GuitarParallaxIcon({ className = '', style = {}, color = '#F04C3E', opacity = 0.08 }: GuitarParallaxIconProps) {
+export default function GuitarParallaxIcon({ className = '', style = {}, color = '#9CA3AF', opacity = 0.08 }: GuitarParallaxIconProps) {
   return (
     <svg
       viewBox="0 0 800 200"

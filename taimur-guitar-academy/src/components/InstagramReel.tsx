@@ -135,17 +135,6 @@ export default function InstagramReel() {
             </div>
           )}
 
-          {/* Instagram Link */}
-          <a
-            href="https://instagram.com/taimurmasud"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-3 left-3 p-1.5 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Instagram className="w-4 h-4" />
-          </a>
-
           {/* Volume Toggle Button */}
           <button
             onClick={(e) => {
@@ -160,6 +149,17 @@ export default function InstagramReel() {
               <Volume2 className="w-4 h-4" />
             )}
           </button>
+
+          {/* Instagram Link */}
+          <a
+            href="https://instagram.com/taimurmasud"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-3 left-3 p-1.5 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Instagram className="w-4 h-4" />
+          </a>
         </div>
       </div>
 

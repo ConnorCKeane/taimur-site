@@ -7,7 +7,7 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#F04C3E', // Red from logo
+          DEFAULT: '#9CA3AF', // Light grey
         },
         background: {
           DEFAULT: '#454349', // Dark gray from logo

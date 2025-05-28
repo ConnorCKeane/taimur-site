@@ -15,31 +15,32 @@ const socialLinks = [
 export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   return (
-    <footer className="bg-background border-t border-gray-200 pt-8 pb-4">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <footer className="bg-background shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand Section */}
-          <div className="flex flex-col items-center">
-            <Link href="/" className="mb-4">
+          <div className="flex flex-col items-center space-y-4">
+            <Link href="/" className="group">
               <Image
                 src="/logo.png"
                 alt="Taimur's Guitar Academy Logo"
                 height={48}
                 width={120}
                 priority
-                className="h-12 w-auto"
+                className="h-12 w-auto group-hover:opacity-90 transition-opacity"
                 style={{ minWidth: 48 }}
               />
+              <div className="h-0.5 w-full bg-[#9CA3AF] mt-1" />
             </Link>
-            <div className="flex items-center gap-x-4 mb-3">
+            <div className="flex items-center justify-center gap-x-6">
               {socialLinks.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#F04C3E] hover:text-red-600 transition-colors"
+                  className="text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
                   aria-label={item.name}
                 >
                   <item.icon className="h-5 w-5" />
@@ -48,7 +49,7 @@ export default function Footer() {
             </div>
             <button
               onClick={() => setIsContactOpen(true)}
-              className="rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#F04C3E] border border-[#F04C3E] shadow-[0_0_10px_rgba(240,76,62,0.2)] hover:shadow-[0_0_15px_rgba(240,76,62,0.3)] transition-all"
+              className="rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#9CA3AF] border border-[#9CA3AF] shadow-[0_0_10px_rgba(156,163,175,0.2)] hover:shadow-[0_0_15px_rgba(156,163,175,0.3)] transition-all"
             >
               Contact Me
             </button>
@@ -56,7 +57,7 @@ export default function Footer() {
 
           {/* Partners */}
           <div className="flex flex-col items-center md:col-span-2">
-            <h3 className="text-md font-semibold text-[#F04C3E] mb-6 text-center w-full">Our Partners:</h3>
+            <h3 className="text-md font-semibold text-[#9CA3AF] mb-6 text-center w-1/2 border-b border-gray-500 pb-0">Our Partners:</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
               <div className="flex justify-center">
                 <Image src="/schoolofrock-logo.png" alt="School of Rock" width={120} height={48} className="h-12 w-auto object-contain" />
@@ -70,7 +71,7 @@ export default function Footer() {
             </div>
             <button
               onClick={() => setIsContactOpen(true)}
-              className="rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#F04C3E] border border-[#F04C3E] shadow-[0_0_10px_rgba(240,76,62,0.2)] hover:shadow-[0_0_15px_rgba(240,76,62,0.3)] transition-all"
+              className="rounded-md bg-transparent px-3 py-1.5 text-xs font-semibold text-[#9CA3AF] border border-[#9CA3AF] shadow-[0_0_10px_rgba(156,163,175,0.2)] hover:shadow-[0_0_15px_rgba(156,163,175,0.3)] transition-all"
             >
               Become a Partner
             </button>
@@ -85,7 +86,7 @@ export default function Footer() {
               href="https://websmith-co.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#F04C3E] hover:text-red-600 underline transition-colors"
+              className="text-[#9CA3AF] hover:text-[#6B7280] underline transition-colors"
             >
               Websmith
             </a>

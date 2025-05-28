@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, Instagram, Mail, Phone } from 'lucide-react';
+import { Menu, X, Instagram, Mail, Phone, MessageCircle } from 'lucide-react';
 import ContactDialog from './ContactDialog';
 
 const navigation = [
@@ -23,7 +23,7 @@ export default function Navigation() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-background h-24 border-b border-gray-200">
+    <header className="fixed inset-x-0 top-0 z-50 bg-background h-24 shadow-[0_2px_10px_rgba(0,0,0,0.1)]">
       <nav className="flex items-center justify-between h-full px-4 lg:px-8" aria-label="Global">
         {/* Social Media Links */}
         <div className="hidden lg:flex items-center gap-x-4">
@@ -33,7 +33,7 @@ export default function Navigation() {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#F04C3E] hover:text-red-600 transition-colors"
+              className="text-white hover:text-gray-200 transition-colors"
               aria-label={item.name}
             >
               <item.icon className="h-5 w-5" />
@@ -62,27 +62,36 @@ export default function Navigation() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm font-medium leading-6 hover:text-primary transition-colors"
-              style={{ color: '#F04C3E' }}
+              className="text-sm font-medium leading-6 hover:text-gray-200 transition-colors"
+              style={{ color: 'white' }}
             >
               {item.name}
             </Link>
           ))}
           <button
             onClick={() => setIsContactOpen(true)}
-            className="rounded-md bg-transparent px-3 py-1.5 text-sm font-semibold text-[#F04C3E] border border-[#F04C3E] shadow-[0_0_10px_rgba(240,76,62,0.2)] hover:shadow-[0_0_15px_rgba(240,76,62,0.3)] transition-all"
+            className="rounded-md bg-transparent px-3 py-1.5 text-sm font-semibold text-white border border-white shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
           >
             Contact
           </button>
         </div>
 
-        {/* Mobile Nav Button */}
-        <div className="flex lg:hidden">
+        {/* Mobile Nav Buttons */}
+        <div className="flex lg:hidden items-center gap-4">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-md p-2.5"
+            onClick={() => setIsContactOpen(true)}
+            style={{ color: 'white' }}
+          >
+            <span className="sr-only">Open contact form</span>
+            <MessageCircle className="h-6 w-6" aria-hidden="true" />
+          </button>
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
             onClick={() => setMobileMenuOpen(true)}
-            style={{ color: '#F04C3E' }}
+            style={{ color: 'white' }}
           >
             <span className="sr-only">Open main menu</span>
             <Menu className="h-6 w-6" aria-hidden="true" />
@@ -113,7 +122,7 @@ export default function Navigation() {
                 type="button"
                 className="-m-2.5 rounded-md p-2.5"
                 onClick={() => setMobileMenuOpen(false)}
-                style={{ color: '#F04C3E' }}
+                style={{ color: 'white' }}
               >
                 <span className="sr-only">Close menu</span>
                 <X className="h-6 w-6" aria-hidden="true" />
@@ -127,7 +136,7 @@ export default function Navigation() {
                       key={item.name}
                       href={item.href}
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 hover:bg-gray-50"
-                      style={{ color: '#F04C3E' }}
+                      style={{ color: 'white' }}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {item.name}
@@ -138,7 +147,7 @@ export default function Navigation() {
                       setMobileMenuOpen(false);
                       setIsContactOpen(true);
                     }}
-                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-medium leading-7 bg-[#F04C3E] text-white hover:bg-red-600 transition-colors"
+                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-medium leading-7 bg-white text-[#454349] hover:bg-gray-100 transition-colors"
                   >
                     Contact
                   </button>
@@ -152,7 +161,7 @@ export default function Navigation() {
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#F04C3E] hover:text-red-600 transition-colors"
+                        className="text-white hover:text-gray-200 transition-colors"
                         aria-label={item.name}
                       >
                         <item.icon className="h-5 w-5" />
