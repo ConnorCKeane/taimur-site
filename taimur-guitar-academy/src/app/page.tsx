@@ -50,7 +50,7 @@ export default function Home() {
           {/* Mobile: Title and sublines above demo reel */}
           <div className="block lg:hidden w-full">
             <div className="text-center mb-10">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 pt-0 mb-1">Mastering the Guitar</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 pt-0 mb-1">Learning the Guitar</h1>
               <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2">With Taimur Masud</h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3">
                 Offering high-quality guitar instruction for all levels
@@ -98,7 +98,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div className="relative z-10">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 pt-12 mb-1">Mastering the Guitar</h1>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 pt-12 mb-1">Learning the Guitar</h1>
               <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2">With Taimur Masud</h2>
               <p className="text-sm sm:text-base text-gray-700 mb-3">
                 Offering high-quality guitar instruction for all levels

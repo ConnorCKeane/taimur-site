@@ -54,17 +54,21 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
     const initializeAudio = async () => {
       try {
+        console.log('Initializing audio context...');
         // Only create AudioContext if it doesn't exist
         if (!audioContextRef.current) {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
           audioContextRef.current = new AudioContextClass();
+          console.log('Created new AudioContext:', audioContextRef.current.state);
         }
 
         // If context is suspended, don't proceed with initialization
         if (audioContextRef.current.state === 'suspended') {
+          console.log('AudioContext is suspended, waiting for user interaction');
           return;
         }
 
+        console.log('Creating audio nodes...');
         const source = audioContextRef.current.createMediaElementSource(videoRef.current!);
         const analyser = audioContextRef.current.createAnalyser();
         const gainNode = audioContextRef.current.createGain();
@@ -85,18 +89,23 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
         // Set initial mute state
         isMutedRef.current = videoRef.current?.muted || false;
+        console.log('Initial mute state:', isMutedRef.current);
 
         // Listen for mute state changes
         videoRef.current?.addEventListener('volumechange', () => {
-          isMutedRef.current = videoRef.current?.muted || false;
-          if (!isMutedRef.current) {
+          const newMutedState = videoRef.current?.muted || false;
+          console.log('Mute state changed:', newMutedState);
+          isMutedRef.current = newMutedState;
+          if (!newMutedState) {
             // Clear stored frames when unmuted
             storedFramesRef.current = [];
             frameIndexRef.current = 0;
+            hasRealAudioRef.current = false;
           }
         });
 
         isInitializedRef.current = true;
+        console.log('Audio initialization complete');
       } catch (error) {
         console.error('Error initializing audio:', error);
       }
@@ -108,6 +117,7 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
     // Cleanup function
     return () => {
       if (audioContextRef.current) {
+        console.log('Cleaning up audio context');
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
@@ -118,13 +128,21 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
   // Add effect to handle user interaction and audio context initialization
   useEffect(() => {
     const handleUserInteraction = async () => {
+      console.log('User interaction detected');
       if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
         try {
+          console.log('Resuming audio context...');
           await audioContextRef.current.resume();
+          console.log('Audio context resumed:', audioContextRef.current.state);
+          
           // Force a re-render of the visualization
           if (analyserRef.current) {
             const dataArray = new Uint8Array(128);
             analyserRef.current.getByteFrequencyData(dataArray);
+            if (dataArray.some(v => v > 0)) {
+              console.log('Real audio data detected');
+              hasRealAudioRef.current = true;
+            }
             lastFrameRef.current = dataArray.slice();
           }
         } catch (error) {
@@ -187,7 +205,10 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
           // Check if we have real audio data
           if (dataArray.some(v => v > 0)) {
-            hasRealAudioRef.current = true;
+            if (!hasRealAudioRef.current) {
+              console.log('Real audio data detected during playback');
+              hasRealAudioRef.current = true;
+            }
           }
 
           if (!isMutedRef.current && hasRealAudioRef.current) {
