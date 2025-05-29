@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
-import { Handshake } from 'lucide-react';
 
 const partners = [
   {
@@ -35,20 +34,6 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
   return (
     <div className="flex justify-center w-full py-8">
       <div className="w-full max-w-3xl rounded-3xl bg-[#232326] bg-opacity-90 shadow-2xl px-0 pt-4 pb-8 flex flex-col items-center border border-white/10 overflow-hidden relative">
-        {/* Logo and Handshake icon in corners */}
-        <div className="absolute top-0 left-0 p-4 z-10">
-          <Image
-            src="/logo.png"
-            alt="Taimur's Guitar Academy Logo"
-            width={80}
-            height={32}
-            className="h-8 w-auto"
-            priority
-          />
-        </div>
-        <div className="absolute top-0 right-0 p-4 z-10">
-          <Handshake className="h-8 w-8 text-white opacity-80" />
-        </div>
         {/* Call to Action Above Carousel */}
         <div className="text-center mb-8 mt-12 sm:mt-8">
           <h3 className="text-xl font-semibold text-white mb-2">Become a Sponsor</h3>

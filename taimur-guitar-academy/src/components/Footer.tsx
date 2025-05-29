@@ -16,7 +16,7 @@ export default function Footer() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Lessons', href: '/services' },
+    { name: 'Lessons', href: '/lessons' },
     { name: 'Shop', href: '/shop' },
   ];
   return (
@@ -53,7 +53,7 @@ export default function Footer() {
 
           {/* Center: Navigation and legal links */}
           <div className="flex flex-col items-center space-y-2">
-            <nav className="flex flex-col sm:flex-row gap-2 sm:gap-6 mb-2">
+            <nav className="flex flex-row gap-4 sm:gap-6 mb-2">
               {navLinks.map((item) => (
                 <Link
                   key={item.name}

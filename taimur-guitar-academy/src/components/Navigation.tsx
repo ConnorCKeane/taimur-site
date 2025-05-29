@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, Instagram, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Menu, X, Instagram, Mail, Phone } from 'lucide-react';
 import ContactDialog from './ContactDialog';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Lessons', href: '/services' },
+  { name: 'Lessons', href: '/lessons' },
   { name: 'Shop', href: '/shop' },
 ];
 
@@ -89,93 +90,108 @@ export default function Navigation() {
           </button>
         </div>
 
-        {/* Contact Button - Mobile Only */}
-        <button
-          type="button"
+        {/* Instagram Button - Mobile Only */}
+        <a
+          href="https://instagram.com/taimurmasud"
+          target="_blank"
+          rel="noopener noreferrer"
           className="lg:hidden inline-flex items-center justify-center rounded-md p-2.5"
-          onClick={() => setIsContactOpen(true)}
           style={{ color: 'white' }}
         >
-          <span className="sr-only">Open contact form</span>
-          <MessageCircle className="h-6 w-6" aria-hidden="true" />
-        </button>
+          <span className="sr-only">Instagram</span>
+          <Instagram className="h-6 w-6" aria-hidden="true" />
+        </a>
       </nav>
 
       {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden">
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/20" onClick={() => setMobileMenuOpen(false)} />
-          {/* Menu panel */}
-          <div className="fixed inset-y-0 left-0 z-50 w-[300px] overflow-y-auto bg-background px-6 py-6 sm:ring-1 sm:ring-gray-900/10">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-                <Image
-                  src="/logo.png"
-                  alt="Taimur's Guitar Academy Logo"
-                  height={32}
-                  width={80}
-                  priority
-                  className="h-8 w-auto"
-                  style={{ minWidth: 32 }}
-                />
-              </Link>
-              <button
-                type="button"
-                className="-m-2.5 rounded-md p-2.5"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{ color: 'white' }}
-              >
-                <span className="sr-only">Close menu</span>
-                <X className="h-6 w-6" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="mt-6 flow-root">
-              <div className="-my-6 divide-y divide-gray-500/10">
-                <div className="space-y-2 py-6">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 hover:bg-gray-50"
-                      style={{ color: 'white' }}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setIsContactOpen(true);
-                    }}
-                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-medium leading-7 bg-white text-[#454349] hover:bg-gray-100 transition-colors"
-                  >
-                    Contact
-                  </button>
-                </div>
-                {/* Social Links in Mobile Menu */}
-                <div className="py-6">
-                  <div className="flex items-center gap-x-4">
-                    {socialLinks.map((item) => (
-                      <a
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="lg:hidden">
+            {/* Backdrop */}
+            <motion.div 
+              className="fixed inset-0 bg-black/20" 
+              onClick={() => setMobileMenuOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            {/* Menu panel */}
+            <motion.div
+              className="fixed inset-y-0 left-0 z-50 w-56 overflow-y-auto bg-background px-6 py-6 sm:ring-1 sm:ring-gray-900/10"
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: 'tween', duration: 0.25 }}
+            >
+              <div className="flex items-center justify-between">
+                <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
+                  <Image
+                    src="/logo.png"
+                    alt="Taimur's Guitar Academy Logo"
+                    height={32}
+                    width={80}
+                    priority
+                    className="h-8 w-auto"
+                    style={{ minWidth: 32 }}
+                  />
+                </Link>
+                <button
+                  type="button"
+                  className="-m-2.5 rounded-md p-2.5"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ color: 'white' }}
+                >
+                  <span className="sr-only">Close menu</span>
+                  <X className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="mt-6 flow-root">
+                <div className="-my-6 divide-y divide-gray-500/10">
+                  <div className="space-y-2 py-6">
+                    {navigation.map((item) => (
+                      <Link
                         key={item.name}
                         href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white hover:text-gray-200 transition-colors"
-                        aria-label={item.name}
+                        className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 hover:bg-gray-50"
+                        style={{ color: 'white' }}
+                        onClick={() => setMobileMenuOpen(false)}
                       >
-                        <item.icon className="h-5 w-5" />
-                      </a>
+                        {item.name}
+                      </Link>
                     ))}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setIsContactOpen(true);
+                      }}
+                      className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-medium leading-7 bg-white text-[#454349] hover:bg-gray-100 transition-colors"
+                    >
+                      Contact
+                    </button>
+                  </div>
+                  {/* Social Links in Mobile Menu */}
+                  <div className="py-6">
+                    <div className="flex items-center gap-x-4">
+                      {socialLinks.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white hover:text-gray-200 transition-colors"
+                          aria-label={item.name}
+                        >
+                          <item.icon className="h-5 w-5" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Contact Dialog */}
       <ContactDialog

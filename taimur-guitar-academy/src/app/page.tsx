@@ -39,17 +39,60 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#E8E8E8] via-[#A4B8D8] via-[#8BA3C8] via-[#A4B8D8] to-[#E8E8E8]">
-      {/* Hero Section */}
+      {/* Mobile: Demo reel above, Desktop: side-by-side */}
       <motion.div
-        className="relative pt-32 pb-12"
+        className="relative pt-40 pb-4 lg:pt-32 lg:pb-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         <div className="mx-auto max-w-5xl px-4 flex flex-col lg:flex-row-reverse items-start justify-center gap-8 lg:gap-16">
-          {/* Content */}
+          {/* Mobile: Title and sublines above demo reel */}
+          <div className="block lg:hidden w-full">
+            <div className="text-center mb-10">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 pt-0 mb-1">Mastering the Guitar</h1>
+              <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2">With Taimur Masud</h2>
+              <p className="text-sm sm:text-base text-gray-700 mb-3">
+                Offering high-quality guitar instruction for all levels
+              </p>
+            </div>
+            <div className="w-full flex justify-center mb-10">
+              <InstagramReel />
+            </div>
+            {/* Icon list after demo reel on mobile */}
+            <div className="space-y-6 mb-10">
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex-shrink-0">
+                  <Users className="h-8 w-8 text-[#1a202c]" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-base font-semibold text-gray-900">20+ Active Students</h3>
+                  <p className="mt-0.5 text-gray-700 text-sm">Join a community of dedicated learners achieving their musical goals through personalized instruction.</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex-shrink-0">
+                  <Award className="h-8 w-8 text-[#1a202c]" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-base font-semibold text-gray-900">15+ Years of Experience</h3>
+                  <p className="mt-0.5 text-gray-700 text-sm">Benefit from expert instruction honed over a decade of teaching and performing.</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex-shrink-0">
+                  <Clock className="h-8 w-8 text-[#1a202c]" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-base font-semibold text-gray-900">250+ Hours Teaching</h3>
+                  <p className="mt-0.5 text-gray-700 text-sm">Extensive hands-on experience teaching students ages 7–17 at School of Rock</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Content (desktop only) */}
           <motion.div 
-            className="w-full lg:w-1/2 flex flex-col justify-center space-y-8 relative text-center lg:text-left"
+            className="hidden lg:flex w-full lg:w-1/2 flex-col justify-center space-y-8 relative text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -62,37 +105,37 @@ export default function Home() {
               </p>
             </div>
             <div className="space-y-6">
-              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <div className="flex-shrink-0">
                   <Users className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div className="text-center lg:text-left">
+                <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">20+ Active Students</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Join a community of dedicated learners achieving their musical goals through personalized instruction.</p>
                 </div>
               </div>
-              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <div className="flex-shrink-0">
                   <Award className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div className="text-center lg:text-left">
+                <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">15+ Years of Experience</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Benefit from expert instruction honed over a decade of teaching and performing.</p>
                 </div>
               </div>
-              <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <div className="flex-shrink-0">
                   <Clock className="h-8 w-8 text-[#1a202c]" />
                 </div>
-                <div className="text-center lg:text-left">
+                <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">250+ Hours Teaching</h3>
                   <p className="mt-0.5 text-gray-700 text-sm">Extensive hands-on experience teaching students ages 7–17 at School of Rock</p>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
+            <div className="flex flex-row items-center gap-2 mt-4">
               <Link
-                href="/services"
+                href="/lessons"
                 className="rounded-md bg-background px-4 py-2 text-sm font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
               >
                 Book a Lesson
@@ -105,9 +148,9 @@ export default function Home() {
               </button>
             </div>
           </motion.div>
-          {/* Image */}
+          {/* Desktop: Demo Reel side-by-side */}
           <motion.div 
-            className="w-full lg:w-1/2 flex justify-center items-start"
+            className="hidden lg:flex w-full lg:w-1/2 justify-center items-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}

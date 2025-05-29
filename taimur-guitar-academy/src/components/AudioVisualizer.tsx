@@ -6,6 +6,7 @@ interface AudioVisualizerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   height: number;
   gain: number; // 0 for muted, 1 for unmuted
+  isPlaying: boolean;
 }
 
 declare global {
@@ -19,17 +20,16 @@ const audioContexts = new WeakMap<HTMLVideoElement, AudioContext>();
 const mediaElementSources = new WeakMap<HTMLVideoElement, MediaElementAudioSourceNode>();
 const gainNodes = new WeakMap<HTMLVideoElement, GainNode>();
 
-export default function AudioVisualizer({ videoRef, height, gain }: AudioVisualizerProps) {
+export default function AudioVisualizer({ videoRef, height, gain, isPlaying }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>(0);
   const phaseRef = useRef<number>(0);
-  const lastSimDataRef = useRef<number[]>([]);
   const lastFrameRef = useRef<Uint8Array | null>(null);
 
   // Padding in px
   const verticalPadding = 16;
-  const canvasHeight = height > 0 ? Math.max(0, height - verticalPadding * 2) : 400;
+  const canvasHeight = height > 0 ? Math.max(0, height - verticalPadding * 2 - 60) : 220;
   const canvasWidth = 64;
 
   useEffect(() => {
@@ -79,20 +79,23 @@ export default function AudioVisualizer({ videoRef, height, gain }: AudioVisuali
       analyser.connect(gainNode);
       gainNode.connect(audioContext.destination);
       analyserRef.current = analyser;
-      // Set gain value
-      gainNode.gain.value = gain;
+      // Always start muted on mount
+      if (gainNode) {
+        gainNode.gain.value = 0;
+        // If gain prop is 1, unmute after mount
+        if (gain === 1) {
+          setTimeout(() => {
+            if (gainNode) gainNode.gain.value = 1;
+          }, 0);
+        }
+      }
     } catch (error) {
       console.error('Error setting up audio context:', error);
     }
 
     // --- Add event listeners to freeze visualizer on pause ---
     const handlePause = () => {
-      if (analyser) {
-        analyser.getByteFrequencyData(dataArray);
-        if (dataArray.some(v => v > 0)) {
-          lastFrameRef.current = dataArray.slice();
-        }
-      }
+      // No-op: rely on lastFrameRef being updated in the animation loop
     };
     const video = videoRef.current;
     video.addEventListener('pause', handlePause);
@@ -102,57 +105,44 @@ export default function AudioVisualizer({ videoRef, height, gain }: AudioVisuali
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const drawFrame = (simData?: number[]) => {
+    const drawFrame = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const barHeight = canvas.height / bufferLength;
       const barSpacing = 1;
       const maxWidth = canvas.width * 0.8;
       ctx.fillStyle = 'var(--background)';
 
-      const playing = !videoRef.current?.paused && !videoRef.current?.ended;
+      const playing = isPlaying;
       if (playing && analyser) {
         analyser.getByteFrequencyData(dataArray);
-        console.log('Analyser data:', Array.from(dataArray));
-        // Only save if not all zeros
+        // Only save if not all zeros; never overwrite with all-zero frame
         if (dataArray.some(v => v > 0)) {
-          console.log('Saving last non-zero frame');
           lastFrameRef.current = dataArray.slice();
         }
-        console.log('Drawing new analyser data');
         for (let i = 0; i < bufferLength; i++) {
           const barWidth = (dataArray[i] / 255) * maxWidth;
           const y = i * (barHeight + barSpacing);
           ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
         }
       } else if (lastFrameRef.current) {
-        console.log('Drawing last saved frame (paused)');
-        // Draw the last saved frame
+        // Freeze: draw the last valid analyser frame when paused
         for (let i = 0; i < bufferLength; i++) {
           const barWidth = (lastFrameRef.current[i] / 255) * maxWidth;
           const y = i * (barHeight + barSpacing);
           ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
         }
       } else {
-        // Simulate music: short peaks/valleys, slower
-        let simValues: number[] = simData || [];
-        if (!simData) {
-          if (playing) {
-            phaseRef.current += 0.04;
-            simValues = [];
-            for (let i = 0; i < bufferLength; i++) {
-              const sine = Math.sin(phaseRef.current + i * 0.7);
-              const random = 0.85 + 0.15 * Math.sin(phaseRef.current * 2 + i * 1.2 + Math.random());
-              const value = 0.18 + 0.10 * sine * random;
-              simValues.push(value);
-            }
-            lastSimDataRef.current = simValues;
-          } else {
-            simValues = lastSimDataRef.current;
-          }
+        // Fallback: draw a simulated frame if no valid analyser data has ever been captured
+        const simValues: number[] = [];
+        phaseRef.current += 0.04;
+        for (let i = 0; i < bufferLength; i++) {
+          const sine = Math.sin(phaseRef.current + i * 0.7);
+          const random = 0.85 + 0.15 * Math.sin(phaseRef.current * 2 + i * 1.2 + Math.random());
+          const value = 0.18 + 0.10 * sine * random;
+          simValues.push(value);
         }
         for (let i = 0; i < bufferLength; i++) {
-          const value = simValues[i] ?? 0.6;
-          const barWidth = value * maxWidth;
+          const barWidth = simValues[i] * maxWidth;
           const y = i * (barHeight + barSpacing);
           ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
         }
@@ -173,7 +163,7 @@ export default function AudioVisualizer({ videoRef, height, gain }: AudioVisuali
         video.removeEventListener('pause', handlePause);
       }
     };
-  }, [videoRef, canvasHeight, gain]);
+  }, [videoRef, canvasHeight, gain, isPlaying]);
 
   return (
     <canvas

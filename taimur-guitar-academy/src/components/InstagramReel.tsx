@@ -37,7 +37,6 @@ export default function InstagramReel() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoBoxRef = useRef<HTMLDivElement>(null);
   const [videoBoxHeight, setVideoBoxHeight] = useState(0);
-  const [showFlag, setShowFlag] = useState(true);
 
   const handleVideoLoad = () => {
     setIsLoading(false);
@@ -82,23 +81,13 @@ export default function InstagramReel() {
     }
   }, [currentIndex, isLoading]);
 
-  // Hide flag after 4 seconds or when unmuted
-  useEffect(() => {
-    if (!isMuted) {
-      setShowFlag(false);
-      return;
-    }
-    const timer = setTimeout(() => setShowFlag(false), 4000);
-    return () => clearTimeout(timer);
-  }, [isMuted]);
-
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Video Demo Box Container with padding for visualization */}
       <div className="relative pl-16" style={{overflow: 'visible'}}>
         {/* Audio Visualizer absolutely positioned to the left, full height of video box */}
-        {isPlaying && videoRef.current && (
-          <AudioVisualizer videoRef={videoRef} height={videoBoxHeight} gain={isMuted ? 0 : 1} />
+        {videoRef.current && (
+          <AudioVisualizer videoRef={videoRef as React.RefObject<HTMLVideoElement>} height={videoBoxHeight} gain={isMuted ? 0 : 1} isPlaying={isPlaying} />
         )}
         {/* Video Demo Box */}
         <div ref={videoBoxRef} className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-4 border-background z-10">
