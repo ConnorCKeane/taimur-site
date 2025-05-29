@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <meta name="theme-color" content="#1a202c" />
+        <meta name="theme-color" content="#18181A" />
       </head>
       <body className={`${inter.className} antialiased bg-background`}>
         <Navigation />
