@@ -89,10 +89,10 @@ export default function Navigation() {
           </button>
         </div>
 
-        {/* Contact Button - Moved to right side */}
+        {/* Contact Button - Mobile Only */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-md p-2.5"
+          className="lg:hidden inline-flex items-center justify-center rounded-md p-2.5"
           onClick={() => setIsContactOpen(true)}
           style={{ color: 'white' }}
         >
