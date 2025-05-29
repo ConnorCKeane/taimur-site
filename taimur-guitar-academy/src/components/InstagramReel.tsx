@@ -40,9 +40,12 @@ export default function InstagramReel() {
 
   const handleVideoLoad = () => {
     setIsLoading(false);
-    // Start playing when video is loaded
-    if (videoRef.current) {
-      videoRef.current.play();
+    // Only attempt to play if the video is not muted (user has interacted)
+    if (videoRef.current && !isMuted) {
+      videoRef.current.play().catch(() => {
+        // If autoplay fails, we'll let the user click to play
+        setIsPlaying(false);
+      });
     }
   };
 
@@ -51,7 +54,10 @@ export default function InstagramReel() {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play();
+        videoRef.current.play().catch((error) => {
+          console.log('Playback failed:', error);
+          setIsPlaying(false);
+        });
       }
       setIsPlaying(!isPlaying);
     }
@@ -59,21 +65,32 @@ export default function InstagramReel() {
 
   const toggleMute = () => {
     setIsMuted((prev) => !prev);
+    // When unmuting, try to play the video
+    if (videoRef.current && isMuted) {
+      videoRef.current.play().catch(() => {
+        // If autoplay fails, we'll let the user click to play
+        setIsPlaying(false);
+      });
+    }
   };
 
   const handleReelChange = (index: number) => {
     setCurrentIndex(index);
     setIsLoading(true);
+    setIsPlaying(false); // Reset playing state when changing reels
   };
 
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
-      // Ensure video plays when component mounts or when reel changes
-      videoRef.current.play();
+      // Only attempt to play if the video is not muted (user has interacted)
+      if (!isMuted) {
+        videoRef.current.play().catch(() => {
+          setIsPlaying(false);
+        });
+      }
     }
-    setIsPlaying(true);
-  }, [currentIndex]);
+  }, [currentIndex, isMuted]);
 
   useLayoutEffect(() => {
     if (videoBoxRef.current) {
@@ -98,7 +115,7 @@ export default function InstagramReel() {
               className="w-full h-full object-cover"
               playsInline
               loop
-              autoPlay
+              muted={isMuted}
               onLoadedData={handleVideoLoad}
               onClick={togglePlay}
             >
