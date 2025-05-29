@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Loader2, Volume2, VolumeX, Instagram } from 'lucide-react';
 import AudioVisualizer from './AudioVisualizer';
 
@@ -31,7 +31,7 @@ const reels: Reel[] = [
 
 export default function InstagramReel() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(1);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,72 +48,90 @@ export default function InstagramReel() {
     preloadedVideos.current = [nextVideo];
   }, [currentIndex]);
 
-  const handleVideoLoad = () => {
-    setIsLoading(false);
-    if (videoRef.current) {
+  const handleVideoLoad = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    try {
       // Always start muted for autoplay
-      videoRef.current.muted = true;
-      videoRef.current.volume = 0;
+      video.muted = true;
+      video.volume = 0;
       setIsMuted(true);
       
       // Try to play the video
-      videoRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((error) => {
-        console.error('Error playing video:', error);
-        setIsPlaying(false);
-      });
+      await video.play();
+      setIsPlaying(true);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error playing video:', error);
+      setIsPlaying(false);
+      setIsLoading(false);
     }
   };
 
   // Handle initial load and reel changes
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
+    const video = videoRef.current;
+    if (!video) return;
+
+    const loadAndPlay = async () => {
+      setIsLoading(true);
+      video.load();
+      
       // Always start muted for autoplay
-      videoRef.current.muted = true;
-      videoRef.current.volume = 0;
+      video.muted = true;
+      video.volume = 0;
       setIsMuted(true);
       
-      videoRef.current.play().then(() => {
+      try {
+        await video.play();
         setIsPlaying(true);
-      }).catch((error) => {
+      } catch (error) {
         console.error('Error playing video:', error);
         setIsPlaying(false);
-      });
-    }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAndPlay();
   }, [currentIndex]);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
+  const togglePlay = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    try {
       if (isPlaying) {
-        videoRef.current.pause();
+        video.pause();
         setIsPlaying(false);
       } else {
-        videoRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch(() => {
-          setIsPlaying(false);
-        });
+        await video.play();
+        setIsPlaying(true);
       }
+    } catch (error) {
+      console.error('Error toggling play:', error);
+      setIsPlaying(false);
     }
   };
 
-  const toggleMute = () => {
-    if (videoRef.current) {
-      const newMutedState = !isMuted;
-      videoRef.current.muted = newMutedState;
-      videoRef.current.volume = newMutedState ? 0 : 1;
-      setIsMuted(newMutedState);
-      
-      // If we're unmuting, ensure the video is playing
-      if (!newMutedState && !isPlaying) {
-        videoRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch((error) => {
-          console.error('Error playing video:', error);
-          setIsPlaying(false);
-        });
+  const toggleMute = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const newMutedState = !isMuted;
+    video.muted = newMutedState;
+    video.volume = newMutedState ? 0 : 1;
+    setIsMuted(newMutedState);
+    
+    // If we're unmuting, ensure the video is playing
+    if (!newMutedState && !isPlaying) {
+      try {
+        await video.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing video:', error);
+        setIsPlaying(false);
       }
     }
   };
@@ -124,7 +142,7 @@ export default function InstagramReel() {
     setIsPlaying(false);
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (videoBoxRef.current) {
       setVideoBoxHeight(videoBoxRef.current.offsetHeight);
     }
@@ -230,7 +248,6 @@ export default function InstagramReel() {
           />
         ))}
       </div>
-
     </div>
   );
 } 

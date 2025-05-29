@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
+import { useAudioAnalyser } from '../hooks/useAudioAnalyser';
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 interface AudioVisualizerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -15,307 +17,134 @@ declare global {
   }
 }
 
-// Keep track of created MediaElementSource nodes and their contexts
-const audioContexts = new WeakMap<HTMLVideoElement, AudioContext>();
-const mediaElementSources = new WeakMap<HTMLVideoElement, MediaElementAudioSourceNode>();
-const gainNodes = new WeakMap<HTMLVideoElement, GainNode>();
+// Initial animation frame (static visualization)
+const INITIAL_FRAME = new Uint8Array([
+  232, 229, 204, 183, 191, 189, 176, 198, 219, 218, 199, 185, 183, 182, 184, 165, 154, 177, 183, 163, 181, 189, 186, 174, 165, 153, 153, 158, 154, 153, 150, 137, 116, 121, 104, 83, 89, 99, 94, 89, 78, 81, 80, 77, 63, 46, 45, 51, 40, 51, 61, 60, 60, 57, 48, 44, 51, 44, 41, 37, 27, 18, 15, 4, 9, 19, 14, 13, 21, 26, 16, 5, 18, 16, 17, 20, 19, 20, 18, 16, 19, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+]);
 
-// Initial animation frames (2 seconds worth of data)
-const initialFrames = [
-  [232, 229, 204, 183, 191, 189, 176, 198, 219, 218, 199, 185, 183, 182, 184, 165, 154, 177, 183, 163, 181, 189, 186, 174, 165, 153, 153, 158, 154, 153, 150, 137, 116, 121, 104, 83, 89, 99, 94, 89, 78, 81, 80, 77, 63, 46, 45, 51, 40, 51, 61, 60, 60, 57, 48, 44, 51, 44, 41, 37, 27, 18, 15, 4, 9, 19, 14, 13, 21, 26, 16, 5, 18, 16, 17, 20, 19, 20, 18, 16, 19, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [229, 229, 208, 185, 187, 185, 171, 193, 219, 218, 193, 189, 180, 189, 190, 173, 163, 181, 184, 163, 175, 184, 184, 175, 163, 148, 153, 156, 155, 160, 158, 142, 114, 120, 103, 77, 84, 96, 97, 89, 80, 78, 78, 77, 64, 51, 52, 54, 41, 46, 57, 58, 59, 55, 44, 42, 51, 46, 38, 35, 22, 13, 9, 0, 12, 19, 13, 14, 21, 25, 13, 6, 15, 11, 12, 16, 16, 14, 14, 11, 17, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  // ... Add all the frames here
-];
+type AudioState = 'init' | 'ready' | 'error';
 
 export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const lastFrameRef = useRef<Uint8Array | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const storedFramesRef = useRef<Uint8Array[]>([]);
-  const frameIndexRef = useRef<number>(0);
-  const isMutedRef = useRef<boolean>(false);
-  const isInitializedRef = useRef<boolean>(false);
+  const readyTimeRef = useRef<number>(0);
   const hasRealAudioRef = useRef<boolean>(false);
+  const dataArrayRef = useRef<Uint8Array>(new Uint8Array(128));
 
-  // Padding in px
-  const verticalPadding = 16;
-  const canvasHeight = height > 0 ? Math.max(0, height - verticalPadding * 2 - 60) : 220;
-  const canvasWidth = 64;
-
-  // Initialize stored frames immediately
-  useEffect(() => {
-    storedFramesRef.current = initialFrames.map(frame => new Uint8Array(frame));
-    frameIndexRef.current = 0;
-  }, []);
-
-  // Initialize audio context when video is available
-  useEffect(() => {
-    if (!videoRef.current || isInitializedRef.current) return;
-
-    let cleanup: (() => void) | undefined;
-
-    const initializeAudio = async () => {
-      try {
-        // Only create AudioContext if it doesn't exist
-        if (!audioContextRef.current) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioContextRef.current = new AudioContextClass();
-          
-          // Safari requires setting the sample rate explicitly
-          if (audioContextRef.current.sampleRate !== 44100) {
-            audioContextRef.current = new AudioContextClass({
-              sampleRate: 44100,
-              latencyHint: 'interactive' // Add latency hint for better performance
-            });
-          }
-
-          // For Safari, we need to ensure the context is running
-          if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume();
-          }
-        }
-
-        // Check if we already have a source for this video
-        if (mediaElementSources.has(videoRef.current!)) {
-          return;
-        }
-
-        const source = audioContextRef.current.createMediaElementSource(videoRef.current!);
-        const analyser = audioContextRef.current.createAnalyser();
-        const gainNode = audioContextRef.current.createGain();
-
-        // Configure analyser for better visualization
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.8;
-
-        // Connect nodes - connect analyser directly to destination for visualization
-        source.connect(analyser);
-        analyser.connect(audioContextRef.current.destination);
-        
-        // Store references
-        audioContexts.set(videoRef.current!, audioContextRef.current);
-        mediaElementSources.set(videoRef.current!, source);
-        gainNodes.set(videoRef.current!, gainNode);
-        analyserRef.current = analyser;
-
-        // Set initial mute state
-        isMutedRef.current = videoRef.current?.muted || false;
-
-        // Listen for mute state changes
-        const handleVolumeChange = () => {
-          const newMutedState = videoRef.current?.muted || false;
-          isMutedRef.current = newMutedState;
-          if (!newMutedState) {
-            // Clear stored frames when unmuted
-            storedFramesRef.current = [];
-            frameIndexRef.current = 0;
-            hasRealAudioRef.current = false;
-          }
-        };
-
-        videoRef.current?.addEventListener('volumechange', handleVolumeChange);
-
-        isInitializedRef.current = true;
-
-        // Set cleanup function
-        cleanup = () => {
-          videoRef.current?.removeEventListener('volumechange', handleVolumeChange);
-          if (audioContextRef.current) {
-            audioContextRef.current.close();
-            audioContextRef.current = null;
-          }
-          isInitializedRef.current = false;
-        };
-      } catch (error) {
-        console.error('Error initializing audio:', error);
+  // Get analyser node from our custom hook
+  const analyser = useAudioAnalyser(videoRef.current, {
+    onStateChange: useCallback((state: AudioState) => {
+      if (state === 'ready') {
+        readyTimeRef.current = performance.now();
       }
-    };
+    }, [])
+  });
 
-    // Initialize audio context
-    initializeAudio();
+  // Memoize bar geometry calculations
+  const { barHeight, barSpacing, maxWidth } = useMemo(() => {
+    const verticalPadding = 16;
+    const canvasHeight = height > 0 ? Math.max(0, height - verticalPadding * 2 - 60) : 220;
+    const canvasWidth = 64;
+    const barHeight = canvasHeight / 128;
+    const barSpacing = 1;
+    const maxWidth = canvasWidth * 0.8;
 
-    // Cleanup function
-    return () => {
-      if (cleanup) cleanup();
-    };
-  }, [videoRef]);
+    return { barHeight, barSpacing, maxWidth };
+  }, [height]);
 
-  // Add effect to handle user interaction and audio context initialization
-  useEffect(() => {
-    let isHandlingInteraction = false;
-
-    const handleUserInteraction = async () => {
-      if (isHandlingInteraction) return;
-      isHandlingInteraction = true;
-      
-      try {
-        // Create new audio context if it doesn't exist
-        if (!audioContextRef.current) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioContextRef.current = new AudioContextClass({
-            sampleRate: 44100,
-            latencyHint: 'interactive' // Add latency hint for better performance
-          });
-        }
-
-        // Resume audio context if suspended
-        if (audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-        }
-
-        // Initialize audio nodes if not already initialized
-        if (!isInitializedRef.current && videoRef.current) {
-          const source = audioContextRef.current.createMediaElementSource(videoRef.current);
-          const analyser = audioContextRef.current.createAnalyser();
-          const gainNode = audioContextRef.current.createGain();
-
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.8;
-
-          source.connect(analyser);
-          analyser.connect(audioContextRef.current.destination);
-
-          audioContexts.set(videoRef.current, audioContextRef.current);
-          mediaElementSources.set(videoRef.current, source);
-          gainNodes.set(videoRef.current, gainNode);
-          analyserRef.current = analyser;
-          isInitializedRef.current = true;
-
-          // Force a re-render of the visualization
-          const dataArray = new Uint8Array(128);
-          analyser.getByteFrequencyData(dataArray);
-          const hasAudioData = dataArray.some(v => v > 0);
-          if (hasAudioData) {
-            hasRealAudioRef.current = true;
-          }
-          lastFrameRef.current = dataArray.slice();
-        }
-      } catch (error) {
-        console.error('Error handling user interaction:', error);
-      }
-
-      isHandlingInteraction = false;
-    };
-
-    // Listen for user interactions
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('touchend', handleUserInteraction); // Add touchend event
-
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('touchend', handleUserInteraction);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!videoRef.current) return;
-
+  // Memoize the draw callback
+  const draw = useCallback((timestamp: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let lastTime = 0;
-    const frameInterval = 1000 / 60; // Target 60 FPS
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'var(--background)';
 
-    const drawFrame = (timestamp: number) => {
-      // Calculate time elapsed since last frame
-      const elapsed = timestamp - lastTime;
-
-      // Only draw if enough time has passed
-      if (elapsed > frameInterval) {
-        lastTime = timestamp;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const barHeight = canvas.height / 128;
-        const barSpacing = 1;
-        const maxWidth = canvas.width * 0.8;
-        ctx.fillStyle = 'var(--background)';
-
-        // Always show visualization, even before audio context is ready
-        if (!analyserRef.current || !isInitializedRef.current) {
-          // Use a static frame if no audio data is available
-          if (storedFramesRef.current.length > 0) {
-            // Use the first frame as the static frame
-            const staticFrame = storedFramesRef.current[0];
-            for (let i = 0; i < 128; i++) {
-              const barWidth = (staticFrame[i] / 255) * maxWidth;
-              const y = i * (barHeight + barSpacing);
-              ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
-            }
-          }
-        } else if (isPlaying && analyserRef.current) {
-          const dataArray = new Uint8Array(128);
-          analyserRef.current.getByteFrequencyData(dataArray);
-
-          // Check if we have real audio data
-          const hasAudioData = dataArray.some(v => v > 0);
-          if (hasAudioData && !hasRealAudioRef.current) {
-            hasRealAudioRef.current = true;
-          }
-
-          if (!isMutedRef.current && hasRealAudioRef.current) {
-            // When not muted and we have real audio, store frames for later replay
-            if (hasAudioData) {
-              storedFramesRef.current.push(dataArray.slice());
-              // Keep only the last 180 frames (about 3 seconds at 60fps)
-              if (storedFramesRef.current.length > 180) {
-                storedFramesRef.current.shift();
-              }
-            }
-            lastFrameRef.current = dataArray.slice();
-          } else {
-            // When muted or no real audio yet, use the first stored frame
-            if (storedFramesRef.current.length > 0) {
-              lastFrameRef.current = storedFramesRef.current[0];
-            }
-          }
-        } else {
-          // When not playing, use the first stored frame
-          if (storedFramesRef.current.length > 0) {
-            lastFrameRef.current = storedFramesRef.current[0];
-          }
-        }
-
-        // Always draw the current frame
-        if (lastFrameRef.current) {
-          for (let i = 0; i < 128; i++) {
-            const barWidth = (lastFrameRef.current[i] / 255) * maxWidth;
-            const y = i * (barHeight + barSpacing);
-            ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
-          }
-        }
+    // If no analyser or not ready, show initial frame
+    if (!analyser) {
+      console.log('No analyzer available, showing initial frame');
+      for (let i = 0; i < 128; i++) {
+        const barWidth = (INITIAL_FRAME[i] / 255) * maxWidth;
+        const y = i * (barHeight + barSpacing);
+        ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
       }
+      return;
+    }
 
-      // Request next frame
-      animationFrameId = requestAnimationFrame(drawFrame);
-    };
+    // Get frequency data
+    analyser.getByteFrequencyData(dataArrayRef.current);
 
-    // Start animation loop
-    animationFrameId = requestAnimationFrame(drawFrame);
+    // Check if we have real audio data
+    const hasAudioData = dataArrayRef.current.some(v => v > 0);
+    const elapsedSinceReady = timestamp - readyTimeRef.current;
 
-    // Cleanup
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+    // Log audio data state
+    if (timestamp % 1000 < 16) { // Log roughly once per second
+      console.log('[Visualizer] Audio state:', {
+        hasAudioData,
+        elapsedSinceReady,
+        hasRealAudio: hasRealAudioRef.current,
+        isPlaying,
+        maxValue: Math.max(...dataArrayRef.current),
+        averageValue: dataArrayRef.current.reduce((a, b) => a + b, 0) / dataArrayRef.current.length,
+        dataArray: Array.from(dataArrayRef.current.slice(0, 5)) // Log first 5 values for debugging
+      });
+    }
+
+    // If we have real audio data, update the flag
+    if (hasAudioData && !hasRealAudioRef.current) {
+      console.log('[Visualizer] Real audio data detected');
+      hasRealAudioRef.current = true;
+    }
+
+    // If we don't have real audio yet and it's been less than 200ms since ready,
+    // or if we're not playing, show initial frame
+    if ((!hasRealAudioRef.current && elapsedSinceReady < 200) || !isPlaying) {
+      if (timestamp % 1000 < 16) { // Log roughly once per second
+        console.log('[Visualizer] Showing initial frame:', {
+          reason: !hasRealAudioRef.current ? 'No real audio yet' : 'Not playing',
+          elapsedSinceReady,
+          isPlaying,
+          hasAudioData,
+          maxValue: Math.max(...dataArrayRef.current)
+        });
       }
-    };
-  }, [videoRef, canvasHeight, isPlaying]);
+      for (let i = 0; i < 128; i++) {
+        const barWidth = (INITIAL_FRAME[i] / 255) * maxWidth;
+        const y = i * (barHeight + barSpacing);
+        ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
+      }
+      return;
+    }
+
+    // Draw live bars
+    for (let i = 0; i < 128; i++) {
+      const barWidth = (dataArrayRef.current[i] / 255) * maxWidth;
+      const y = i * (barHeight + barSpacing);
+      ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
+    }
+  }, [analyser, barHeight, barSpacing, maxWidth, isPlaying]);
+
+  // Start animation loop
+  useAnimationFrame(draw);
+
+  // Reset real audio flag when video changes
+  useEffect(() => {
+    hasRealAudioRef.current = false;
+  }, [videoRef.current]);
 
   return (
     <canvas
       ref={canvasRef}
       className="absolute left-0 z-20"
-      width={canvasWidth}
-      height={canvasHeight}
+      width={64}
+      height={height > 0 ? Math.max(0, height - 32 - 60) : 220}
       style={{ 
         pointerEvents: 'none', 
-        height: `${canvasHeight}px`, 
-        top: `${verticalPadding + 24}px`,
+        height: `${height > 0 ? Math.max(0, height - 32 - 60) : 220}px`, 
+        top: '24px',
         opacity: 1,
         WebkitTransform: 'translateZ(0)', // Force hardware acceleration on Safari
         transform: 'translateZ(0)'
