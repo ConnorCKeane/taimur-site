@@ -25,9 +25,8 @@ export default function Home() {
       const aboutSection = document.getElementById('about-section');
       if (aboutSection) {
         const rect = aboutSection.getBoundingClientRect();
-        // Show button when about section is not in view
-        const isAboutVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-        setShowScrollButton(!isAboutVisible);
+        // Show button only when about section is completely out of view (above viewport)
+        setShowScrollButton(rect.top > window.innerHeight);
       }
     };
 
@@ -142,11 +141,6 @@ export default function Home() {
         transition={{ duration: 0.5, delay: 0.6 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
-          {/* About Me header */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2 inline-block border-b-2 border-gray-900 pb-1">About Me</h2>
-          </div>
-          
           <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
             <div className="flex-shrink-0 flex flex-col items-center">
               <Image src="/taimur-kid.png" alt="Taimur as a kid with guitar" width={224} height={224} className="w-56 h-56 object-cover rounded-full border-4 border-background shadow-2xl mb-4" />
@@ -170,14 +164,19 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <div className="flex-1 text-gray-700 md:pt-8 text-left px-4 md:px-0">
+            <div className="flex-1">
+              {/* About Me header - moved inside the content area */}
+              <div className="flex justify-center md:justify-start mb-6">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900">About Me</h2>
+              </div>
+              
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
                   <div className="flex-shrink-0 flex justify-center md:mt-1.5">
                     <GraduationCap className="h-6 w-6 text-gray-900" />
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-base leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-700">
                       <span className="font-semibold text-gray-900">21-year-old musician & educator</span> in New Jersey, pursuing Music Education
                     </p>
                   </div>
@@ -188,7 +187,7 @@ export default function Home() {
                     <Music className="h-6 w-6 text-gray-900" />
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-base leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-700">
                       <span className="font-semibold text-gray-900">14+ years</span> mastering guitar, bass, and drums
                     </p>
                   </div>
@@ -199,7 +198,7 @@ export default function Home() {
                     <School className="h-6 w-6 text-gray-900" />
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-base leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-700">
                       <span className="font-semibold text-gray-900">School of Rock</span> certified instructor (ages 5–17)
                     </p>
                   </div>
@@ -210,7 +209,7 @@ export default function Home() {
                     <Mic className="h-6 w-6 text-gray-900" />
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-base leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-700">
                       <span className="font-semibold text-gray-900">8+ years</span> of professional performance experience
                     </p>
                   </div>
@@ -221,13 +220,14 @@ export default function Home() {
                     <Video className="h-6 w-6 text-gray-900" />
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-base leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-700">
                       <span className="font-semibold text-gray-900">Music producer & content creator</span> with 160K+ followers
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="mt-6 text-base text-center md:text-left">
+              <div className="w-full border-t border-gray-900 my-6"></div>
+              <div className="text-base text-center md:text-left text-gray-700">
                 <span className="font-semibold text-gray-900">Taimur&apos;s Guitar Academy</span> offers personalized guitar lessons for all ages and skill levels. Lessons are tailored to your goals, with a focus on comprehensive music knowledge and individual growth.
               </div>
             </div>

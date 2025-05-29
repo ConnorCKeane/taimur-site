@@ -57,16 +57,16 @@ export default function Footer() {
 
           {/* Partners */}
           <div className="flex flex-col items-center md:col-span-2">
-            <h3 className="text-md font-semibold text-[#9CA3AF] mb-6 text-center w-1/2 border-b border-gray-500 pb-0">Our Partners:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-6">
+            <h3 className="text-md font-semibold text-[#9CA3AF] mb-4 text-center border-b border-gray-500 pb-1">Our Partners</h3>
+            <div className="grid grid-cols-3 gap-4 w-full mb-4">
               <div className="flex justify-center">
-                <Image src="/schoolofrock-logo.png" alt="School of Rock" width={120} height={48} className="h-12 w-auto object-contain" />
+                <Image src="/schoolofrock-logo.png" alt="School of Rock" width={100} height={40} className="h-10 w-auto object-contain" />
               </div>
               <div className="flex justify-center">
-                <Image src="/Wylde-Audio-logo.png" alt="Wylde Audio" width={120} height={48} className="h-12 w-auto object-contain" />
+                <Image src="/Wylde-Audio-logo.png" alt="Wylde Audio" width={100} height={40} className="h-10 w-auto object-contain" />
               </div>
               <div className="flex justify-center">
-                <Image src="/Logo-Tagima.png" alt="Tagima" width={180} height={72} className="h-16 w-auto object-contain" />
+                <Image src="/Logo-Tagima.png" alt="Tagima" width={150} height={60} className="h-12 w-auto object-contain" />
               </div>
             </div>
             <button

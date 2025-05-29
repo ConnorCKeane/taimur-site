@@ -23,7 +23,7 @@ export default function Navigation() {
   const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-background h-24 shadow-[0_2px_10px_rgba(0,0,0,0.1)]">
+    <header className="fixed inset-x-0 top-0 z-50 bg-background h-20 shadow-[0_2px_10px_rgba(0,0,0,0.1)] rounded-b-xl">
       <nav className="flex items-center justify-between h-full px-4 lg:px-8" aria-label="Global">
         {/* Social Media Links */}
         <div className="hidden lg:flex items-center gap-x-4">
@@ -47,11 +47,11 @@ export default function Navigation() {
             <Image
               src="/logo.png"
               alt="Taimur's Guitar Academy Logo"
-              height={48}
-              width={120}
+              height={44}
+              width={110}
               priority
-              className="h-12 w-auto"
-              style={{ minWidth: 48 }}
+              className="h-11 w-auto"
+              style={{ minWidth: 44 }}
             />
           </Link>
         </div>
@@ -77,16 +77,7 @@ export default function Navigation() {
         </div>
 
         {/* Mobile Nav Buttons */}
-        <div className="flex lg:hidden items-center gap-4">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-md p-2.5"
-            onClick={() => setIsContactOpen(true)}
-            style={{ color: 'white' }}
-          >
-            <span className="sr-only">Open contact form</span>
-            <MessageCircle className="h-6 w-6" aria-hidden="true" />
-          </button>
+        <div className="flex lg:hidden items-center">
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -97,6 +88,17 @@ export default function Navigation() {
             <Menu className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
+
+        {/* Contact Button - Moved to right side */}
+        <button
+          type="button"
+          className="inline-flex items-center justify-center rounded-md p-2.5"
+          onClick={() => setIsContactOpen(true)}
+          style={{ color: 'white' }}
+        >
+          <span className="sr-only">Open contact form</span>
+          <MessageCircle className="h-6 w-6" aria-hidden="true" />
+        </button>
       </nav>
 
       {/* Mobile menu */}

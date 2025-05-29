@@ -45,7 +45,7 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
             onClick={onContactClick}
             className="inline-block rounded-md bg-transparent px-4 py-2 text-sm font-semibold text-white border border-white shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300"
           >
-            Partner With Us
+            Partner With Me
           </button>
         </div>
         {/* Animated Carousel */}
