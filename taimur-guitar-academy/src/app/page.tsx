@@ -8,6 +8,7 @@ import ContactDialog from '@/components/ContactDialog';
 import { motion } from 'framer-motion';
 import InstagramReel from '@/components/InstagramReel';
 import PartnersCarousel from '@/components/PartnersCarousel';
+import ParallaxGuitar from '@/components/ParallaxGuitar';
 
 export default function Home() {
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -39,6 +40,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#E8E8E8] via-[#A4B8D8] via-[#8BA3C8] via-[#A4B8D8] to-[#E8E8E8]">
+      <ParallaxGuitar />
       {/* Mobile: Demo reel above, Desktop: side-by-side */}
       <motion.div
         className="relative pt-40 pb-4 lg:pt-32 lg:pb-12"
