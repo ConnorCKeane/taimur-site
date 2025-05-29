@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function SuccessPage() {
+function SuccessContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
@@ -37,7 +37,7 @@ export default function SuccessPage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">Payment Successful!</h2>
             <p className="mt-2 text-gray-600">
-              Thank you for booking your lesson. We'll send you a confirmation email with all the details.
+              Thank you for booking your lesson. We&apos;ll send you a confirmation email with all the details.
             </p>
             <Link
               href="/lessons"
@@ -52,7 +52,7 @@ export default function SuccessPage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">Something went wrong</h2>
             <p className="mt-2 text-gray-600">
-              We couldn't verify your payment. Please contact support if you've been charged.
+              We couldn&apos;t verify your payment. Please contact support if you&apos;ve been charged.
             </p>
             <Link
               href="/lessons"
@@ -64,5 +64,22 @@ export default function SuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Loading...</h2>
+            <p className="mt-2 text-gray-600">Please wait while we load your payment status.</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 } 
