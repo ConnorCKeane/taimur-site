@@ -6,220 +6,169 @@ interface UseAudioAnalyserOptions {
   onStateChange?: (state: AudioState) => void;
 }
 
-// Keep track of created contexts and sources per video element
-const audioContexts = new WeakMap<HTMLVideoElement, AudioContext>();
-const mediaElementSources = new WeakMap<HTMLVideoElement, MediaElementAudioSourceNode>();
-const gainNodes = new WeakMap<HTMLVideoElement, GainNode>();
-const analyserNodes = new WeakMap<HTMLVideoElement, AnalyserNode>();
-
 export function useAudioAnalyser(
   video: HTMLVideoElement | null,
   { onStateChange }: UseAudioAnalyserOptions = {}
 ): AnalyserNode | null {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const hasUserInteractedRef = useRef(false);
-  const isInitializedRef = useRef(false);
-  const initializationPromiseRef = useRef<Promise<void> | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioGraphRef = useRef<{ analyser: AnalyserNode; source: MediaElementAudioSourceNode } | null>(null);
 
+  // Handle video state changes
   useEffect(() => {
-    if (!video) {
-      setAnalyser(null);
-      return;
-    }
+    if (!video) return;
 
-    let audioContext: AudioContext | null = null;
-    let mediaSource: MediaElementAudioSourceNode | null = null;
-    let gainNode: GainNode | null = null;
-    let analyserNode: AnalyserNode | null = null;
+    const handlePlayStateChange = () => {
+      console.log('[Audio] Video play state changed:', {
+        playing: !video.paused,
+        muted: video.muted,
+        volume: video.volume,
+        hasUserInteracted: hasUserInteractedRef.current,
+        hasAudioContext: !!audioContextRef.current,
+        hasAudioGraph: !!audioGraphRef.current
+      });
 
-    const initializeAudio = async () => {
-      if (isInitializedRef.current) {
-        return;
+      // If video is playing and we have an audio context, ensure it's running
+      if (!video.paused && audioContextRef.current?.state === 'suspended') {
+        console.log('[Audio] Resuming suspended audio context');
+        audioContextRef.current.resume().catch(console.error);
       }
-
-      if (initializationPromiseRef.current) {
-        await initializationPromiseRef.current;
-        return;
-      }
-
-      isInitializedRef.current = true;
-
-      initializationPromiseRef.current = (async () => {
-        try {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          
-          // Create or reuse audio context
-          if (audioContextRef.current) {
-            audioContext = audioContextRef.current;
-          } else {
-            audioContext = new AudioContextClass({
-              sampleRate: 44100,
-              latencyHint: 'interactive'
-            });
-            audioContextRef.current = audioContext;
-          }
-
-          // Resume audio context if suspended
-          if (audioContext.state === 'suspended') {
-            console.log('[Audio] Resuming suspended audio context');
-            await audioContext.resume();
-          }
-
-          if (mediaElementSources.has(video)) {
-            analyserNode = analyserNodes.get(video)!;
-            mediaSource = mediaElementSources.get(video)!;
-            gainNode = gainNodes.get(video)!;
-          } else {
-            try {
-              // Create new audio graph
-              mediaSource = audioContext.createMediaElementSource(video);
-              analyserNode = audioContext.createAnalyser();
-              gainNode = audioContext.createGain();
-
-              analyserNode.fftSize = 256;
-              analyserNode.smoothingTimeConstant = 0.7;
-
-              // Create a gain node for the analyzer to ensure consistent signal
-              const analyserGain = audioContext.createGain();
-              analyserGain.gain.value = 1; // Always keep analyzer gain at 1
-
-              // Create a splitter to ensure analyzer gets full signal
-              const splitter = audioContext.createChannelSplitter(2);
-              mediaSource.connect(splitter);
-              
-              // Connect splitter to analyzer path (always active)
-              splitter.connect(analyserGain, 0);
-              analyserGain.connect(analyserNode);
-              
-              // Connect splitter to audio output path (controlled by mute)
-              splitter.connect(gainNode, 1);
-              gainNode.connect(audioContext.destination);
-
-              // Store references
-              audioContexts.set(video, audioContext);
-              mediaElementSources.set(video, mediaSource);
-              gainNodes.set(video, gainNode);
-              analyserNodes.set(video, analyserNode);
-
-              // Set gain based on video's mute state
-              gainNode.gain.value = video.muted ? 0 : 1;
-
-              const handleVolumeChange = () => {
-                if (gainNode) {
-                  gainNode.gain.value = video.muted ? 0 : 1;
-                  console.log('[Audio] Volume state changed:', {
-                    muted: video.muted,
-                    gain: gainNode.gain.value,
-                    contextState: audioContext?.state,
-                    analyserConnected: analyserNode && analyserNode.numberOfInputs > 0,
-                    mediaSourceConnected: mediaSource && mediaSource.numberOfOutputs > 0,
-                    analyserGain: analyserGain.gain.value,
-                    splitterConnected: splitter.numberOfOutputs > 0
-                  });
-                }
-              };
-
-              video.addEventListener('volumechange', handleVolumeChange);
-
-              setAnalyser(analyserNode);
-              onStateChange?.('ready');
-
-              // Log initial audio graph state
-              console.log('[Audio] Graph initialized:', {
-                contextState: audioContext.state,
-                analyserConnected: analyserNode && analyserNode.numberOfInputs > 0,
-                mediaSourceConnected: mediaSource && mediaSource.numberOfOutputs > 0,
-                gainValue: gainNode.gain.value,
-                videoMuted: video.muted,
-                videoPaused: video.paused,
-                videoReadyState: video.readyState,
-                analyserGain: analyserGain.gain.value,
-                splitterConnected: splitter.numberOfOutputs > 0
-              });
-            } catch (error) {
-              console.error('[Audio] Error creating audio graph:', error);
-              onStateChange?.('error');
-              throw error;
-            }
-          }
-        } catch (error) {
-          console.error('[Audio] Initialization error:', error);
-          onStateChange?.('error');
-          isInitializedRef.current = false;
-          throw error;
-        } finally {
-          initializationPromiseRef.current = null;
-        }
-      })();
-
-      return initializationPromiseRef.current;
     };
 
-    const handleUserInteraction = async () => {
-      if (hasUserInteractedRef.current) return;
-      hasUserInteractedRef.current = true;
+    const handleVolumeChange = () => {
+      console.log('[Audio] Volume state changing:', {
+        muted: video.muted,
+        volume: video.volume,
+        hasUserInteracted: hasUserInteractedRef.current,
+        hasAudioContext: !!audioContextRef.current,
+        hasAudioGraph: !!audioGraphRef.current
+      });
 
+      // If unmuting and we have an audio context, ensure it's running
+      if (!video.muted && audioContextRef.current?.state === 'suspended') {
+        console.log('[Audio] Resuming audio context after unmute');
+        audioContextRef.current.resume().catch(console.error);
+      }
+    };
+
+    video.addEventListener('play', handlePlayStateChange);
+    video.addEventListener('pause', handlePlayStateChange);
+    video.addEventListener('volumechange', handleVolumeChange);
+
+    return () => {
+      video.removeEventListener('play', handlePlayStateChange);
+      video.removeEventListener('pause', handlePlayStateChange);
+      video.removeEventListener('volumechange', handleVolumeChange);
+    };
+  }, [video]);
+
+  // Initialize audio context and graph
+  useEffect(() => {
+    if (!video) return;
+
+    const initializeAudio = async () => {
       try {
-        // Resume audio context on user interaction
-        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-          console.log('[Audio] Resuming audio context on user interaction');
+        console.log('[Audio] Starting initialization:', {
+          videoReady: video.readyState >= 2,
+          hasUserInteracted: hasUserInteractedRef.current,
+          hasAudioContext: !!audioContextRef.current,
+          hasAudioGraph: !!audioGraphRef.current
+        });
+
+        // Only initialize if we have user interaction or video is ready
+        if (!hasUserInteractedRef.current && video.readyState < 2) {
+          console.log('[Audio] Waiting for user interaction or video ready state');
+          return;
+        }
+
+        // Create or reuse audio context
+        if (!audioContextRef.current) {
+          console.log('[Audio] Creating new audio context');
+          const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          audioContextRef.current = new AudioContextClass();
+        } else {
+          console.log('[Audio] Reusing existing audio context');
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+          }
+        }
+
+        // Create or reuse audio graph
+        if (!audioGraphRef.current) {
+          console.log('[Audio] Creating new audio graph');
+          const analyser = audioContextRef.current.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.8;
+
+          const source = audioContextRef.current.createMediaElementSource(video);
+          
+          // Create a gain node for the analyzer to ensure consistent signal
+          const analyserGain = audioContextRef.current.createGain();
+          analyserGain.gain.value = 1; // Always keep analyzer gain at 1
+
+          // Create a splitter to ensure analyzer gets full signal
+          const splitter = audioContextRef.current.createChannelSplitter(2);
+          source.connect(splitter);
+          
+          // Connect splitter to analyzer path (always active)
+          splitter.connect(analyserGain, 0);
+          analyserGain.connect(analyser);
+          
+          // Connect splitter to audio output path (controlled by mute)
+          splitter.connect(audioContextRef.current.destination, 1);
+
+          audioGraphRef.current = { analyser, source };
+          setAnalyser(analyser);
+        } else {
+          console.log('[Audio] Reusing existing audio graph');
+        }
+
+        // Ensure audio context is running
+        if (audioContextRef.current.state === 'suspended') {
+          console.log('[Audio] Resuming audio context');
           await audioContextRef.current.resume();
         }
-        await initializeAudio();
+
+        onStateChange?.('ready');
       } catch (error) {
-        console.error('[Audio] User interaction error:', error);
+        console.error('[Audio] Error initializing audio:', error);
         onStateChange?.('error');
       }
     };
 
-    // Add more event listeners for user interaction
-    const userInteractionEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
-    userInteractionEvents.forEach(event => {
-      document.addEventListener(event, handleUserInteraction);
+    initializeAudio();
+  }, [video, onStateChange]);
+
+  // Handle user interaction
+  useEffect(() => {
+    if (!video || hasUserInteractedRef.current) return;
+
+    const handleUserInteraction = async () => {
+      console.log('[Audio] User interaction detected');
+      hasUserInteractedRef.current = true;
+
+      if (audioContextRef.current?.state === 'suspended') {
+        console.log('[Audio] Resuming audio context after user interaction');
+        try {
+          await audioContextRef.current.resume();
+          onStateChange?.('ready');
+        } catch (error) {
+          console.error('[Audio] Error resuming audio context:', error);
+          onStateChange?.('error');
+        }
+      }
+    };
+
+    const events = ['touchstart', 'click', 'keydown'];
+    events.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, { once: true });
     });
 
-    if (video.readyState >= 2) {
-      initializeAudio();
-    } else {
-      const handleVideoLoad = () => {
-        if (video.readyState >= 2) {
-          console.log('[Audio] Video ready for initialization:', {
-            readyState: video.readyState,
-            muted: video.muted,
-            paused: video.paused
-          });
-          initializeAudio();
-        }
-      };
-      video.addEventListener('loadeddata', handleVideoLoad);
-      video.addEventListener('canplay', handleVideoLoad);
-
-      return () => {
-        video.removeEventListener('loadeddata', handleVideoLoad);
-        video.removeEventListener('canplay', handleVideoLoad);
-      };
-    }
-
     return () => {
-      userInteractionEvents.forEach(event => {
+      events.forEach(event => {
         document.removeEventListener(event, handleUserInteraction);
       });
-
-      if (mediaSource) {
-        mediaSource.disconnect();
-      }
-      if (gainNode) {
-        gainNode.disconnect();
-      }
-      if (analyserNode) {
-        analyserNode.disconnect();
-      }
-      if (audioContext && !audioContexts.has(video)) {
-        audioContext.close();
-      }
-      isInitializedRef.current = false;
-      initializationPromiseRef.current = null;
     };
   }, [video, onStateChange]);
 

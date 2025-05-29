@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, Volume2, VolumeX, Instagram } from 'lucide-react';
 import AudioVisualizer from './AudioVisualizer';
 
@@ -34,10 +34,31 @@ export default function InstagramReel() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(1);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoBoxRef = useRef<HTMLDivElement>(null);
   const [videoBoxHeight, setVideoBoxHeight] = useState(0);
   const preloadedVideos = useRef<HTMLVideoElement[]>([]);
+
+  // Handle user interaction
+  const handleUserInteraction = useCallback(() => {
+    console.log('[InstagramReel] User interaction detected');
+    setHasUserInteracted(true);
+  }, []);
+
+  // Add event listeners for user interaction
+  useEffect(() => {
+    const events = ['touchstart', 'click', 'keydown'];
+    events.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, { once: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+    };
+  }, [handleUserInteraction]);
 
   // Preload next video
   useEffect(() => {
@@ -75,6 +96,7 @@ export default function InstagramReel() {
     if (!video) return;
 
     const loadAndPlay = async () => {
+      console.log('[InstagramReel] Loading and playing new video');
       setIsLoading(true);
       video.load();
       
@@ -86,8 +108,10 @@ export default function InstagramReel() {
       try {
         await video.play();
         setIsPlaying(true);
+        // Trigger user interaction for audio context
+        handleUserInteraction();
       } catch (error) {
-        console.error('Error playing video:', error);
+        console.error('[InstagramReel] Error playing video:', error);
         setIsPlaying(false);
       } finally {
         setIsLoading(false);
@@ -95,7 +119,7 @@ export default function InstagramReel() {
     };
 
     loadAndPlay();
-  }, [currentIndex]);
+  }, [currentIndex, handleUserInteraction]);
 
   const togglePlay = async () => {
     const video = videoRef.current;
@@ -103,14 +127,16 @@ export default function InstagramReel() {
 
     try {
       if (isPlaying) {
+        console.log('[InstagramReel] Pausing video');
         video.pause();
         setIsPlaying(false);
       } else {
+        console.log('[InstagramReel] Playing video');
         await video.play();
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Error toggling play:', error);
+      console.error('[InstagramReel] Error toggling play:', error);
       setIsPlaying(false);
     }
   };
@@ -119,22 +145,70 @@ export default function InstagramReel() {
     const video = videoRef.current;
     if (!video) return;
 
+    console.log('[InstagramReel] Toggle mute:', { 
+      currentMuted: isMuted, 
+      hasUserInteracted,
+      isPlaying,
+      videoPaused: video.paused
+    });
+
     const newMutedState = !isMuted;
+    
+    // Update video state without pausing
     video.muted = newMutedState;
     video.volume = newMutedState ? 0 : 1;
     setIsMuted(newMutedState);
     
-    // If we're unmuting, ensure the video is playing
+    // If we're unmuting and not playing, start playing
     if (!newMutedState && !isPlaying) {
       try {
+        console.log('[InstagramReel] Unmuting and playing video');
         await video.play();
         setIsPlaying(true);
       } catch (error) {
-        console.error('Error playing video:', error);
+        console.error('[InstagramReel] Error playing video after unmute:', error);
         setIsPlaying(false);
       }
     }
   };
+
+  // Add video event listeners
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => {
+      console.log('[InstagramReel] Video play event');
+      setIsPlaying(true);
+      // Trigger user interaction for audio context
+      handleUserInteraction();
+    };
+
+    const handlePause = () => {
+      console.log('[InstagramReel] Video pause event');
+      setIsPlaying(false);
+    };
+
+    const handleVolumeChange = () => {
+      console.log('[InstagramReel] Video volume change event:', {
+        muted: video.muted,
+        volume: video.volume,
+        hasUserInteracted,
+        isPlaying
+      });
+      setIsMuted(video.muted);
+    };
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('volumechange', handleVolumeChange);
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('volumechange', handleVolumeChange);
+    };
+  }, [handleUserInteraction, hasUserInteracted]);
 
   const handleReelChange = (index: number) => {
     setCurrentIndex(index);
@@ -156,10 +230,15 @@ export default function InstagramReel() {
         <AudioVisualizer 
           videoRef={videoRef as React.RefObject<HTMLVideoElement>} 
           height={videoBoxHeight} 
-          isPlaying={isPlaying} 
+          isPlaying={isPlaying}
+          hasUserInteracted={hasUserInteracted}
         />
         {/* Video Demo Box */}
-        <div ref={videoBoxRef} className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-4 border-background z-10">
+        <div 
+          ref={videoBoxRef} 
+          className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-4 border-background z-10"
+          onClick={handleUserInteraction}
+        >
           {/* Video Container */}
           <div className="relative w-full h-full bg-gray-900">
             <video
