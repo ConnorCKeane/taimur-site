@@ -241,16 +241,15 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
         // Always show visualization, even before audio context is ready
         if (!analyserRef.current || !isInitializedRef.current) {
-          console.log('Using initial frames - analyser:', !!analyserRef.current, 'initialized:', isInitializedRef.current);
-          // Use initial frames if no audio data is available
+          // Use a static frame if no audio data is available
           if (storedFramesRef.current.length > 0) {
-            const frame = storedFramesRef.current[frameIndexRef.current];
+            // Use the first frame as the static frame
+            const staticFrame = storedFramesRef.current[0];
             for (let i = 0; i < 128; i++) {
-              const barWidth = (frame[i] / 255) * maxWidth;
+              const barWidth = (staticFrame[i] / 255) * maxWidth;
               const y = i * (barHeight + barSpacing);
               ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
             }
-            frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
           }
         } else if (isPlaying && analyserRef.current) {
           const dataArray = new Uint8Array(128);
@@ -280,12 +279,15 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
             }
             lastFrameRef.current = dataArray.slice();
           } else {
-            // When muted or no real audio yet, replay stored frames
+            // When muted or no real audio yet, use the first stored frame
             if (storedFramesRef.current.length > 0) {
-              lastFrameRef.current = storedFramesRef.current[frameIndexRef.current];
-              frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
-              console.log('Replaying stored frame:', frameIndexRef.current, 'of', storedFramesRef.current.length);
+              lastFrameRef.current = storedFramesRef.current[0];
             }
+          }
+        } else {
+          // When not playing, use the first stored frame
+          if (storedFramesRef.current.length > 0) {
+            lastFrameRef.current = storedFramesRef.current[0];
           }
         }
 
