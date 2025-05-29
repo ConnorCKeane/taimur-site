@@ -11,6 +11,7 @@ interface AudioVisualizerProps {
 declare global {
   interface Window {
     webkitAudioContext: typeof AudioContext;
+    webkitOfflineAudioContext: typeof OfflineAudioContext;
   }
 }
 
@@ -330,7 +331,9 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
         pointerEvents: 'none', 
         height: `${canvasHeight}px`, 
         top: `${verticalPadding + 24}px`,
-        opacity: 1
+        opacity: 1,
+        WebkitTransform: 'translateZ(0)', // Force hardware acceleration on Safari
+        transform: 'translateZ(0)'
       }}
     />
   );
