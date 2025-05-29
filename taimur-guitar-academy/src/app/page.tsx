@@ -184,6 +184,11 @@ export default function Home() {
         transition={{ duration: 0.5, delay: 0.6 }}
       >
         <div className="mx-auto max-w-5xl px-6 lg:px-8">
+          {/* About Me header - moved outside for mobile */}
+          <div className="flex justify-center md:hidden mb-6">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900">About Me</h2>
+          </div>
+          
           <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
             <div className="flex-shrink-0 flex flex-col items-center">
               <Image src="/taimur-kid.png" alt="Taimur as a kid with guitar" width={224} height={224} className="w-56 h-56 object-cover rounded-full border-4 border-background shadow-2xl mb-4" />
@@ -208,8 +213,8 @@ export default function Home() {
               </div>
             </div>
             <div className="flex-1">
-              {/* About Me header - moved inside the content area */}
-              <div className="flex justify-center md:justify-start mb-6">
+              {/* About Me header - only visible on desktop */}
+              <div className="hidden md:flex justify-start mb-6">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900">About Me</h2>
               </div>
               
