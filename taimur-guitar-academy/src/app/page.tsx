@@ -41,7 +41,7 @@ export default function Home() {
     <main className="min-h-screen bg-gradient-to-br from-[#E8E8E8] via-[#A4B8D8] via-[#8BA3C8] via-[#A4B8D8] to-[#E8E8E8]">
       {/* Hero Section */}
       <motion.div
-        className="relative pt-40 pb-12"
+        className="relative pt-32 pb-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
