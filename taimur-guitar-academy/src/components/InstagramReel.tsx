@@ -51,12 +51,16 @@ export default function InstagramReel() {
   const handleVideoLoad = () => {
     setIsLoading(false);
     if (videoRef.current) {
-      // Start muted for autoplay
+      // Always start muted for autoplay
       videoRef.current.muted = true;
       videoRef.current.volume = 0;
+      setIsMuted(true);
+      
+      // Try to play the video
       videoRef.current.play().then(() => {
         setIsPlaying(true);
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('Error playing video:', error);
         setIsPlaying(false);
       });
     }
@@ -66,11 +70,15 @@ export default function InstagramReel() {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
-      videoRef.current.muted = isMuted;
-      videoRef.current.volume = isMuted ? 0 : 1;
+      // Always start muted for autoplay
+      videoRef.current.muted = true;
+      videoRef.current.volume = 0;
+      setIsMuted(true);
+      
       videoRef.current.play().then(() => {
         setIsPlaying(true);
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('Error playing video:', error);
         setIsPlaying(false);
       });
     }
@@ -97,6 +105,16 @@ export default function InstagramReel() {
       videoRef.current.muted = newMutedState;
       videoRef.current.volume = newMutedState ? 0 : 1;
       setIsMuted(newMutedState);
+      
+      // If we're unmuting, ensure the video is playing
+      if (!newMutedState && !isPlaying) {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch((error) => {
+          console.error('Error playing video:', error);
+          setIsPlaying(false);
+        });
+      }
     }
   };
 
