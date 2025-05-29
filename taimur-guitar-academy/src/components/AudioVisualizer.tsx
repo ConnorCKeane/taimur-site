@@ -65,14 +65,15 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
           // Safari requires setting the sample rate explicitly
           if (audioContextRef.current.sampleRate !== 44100) {
             audioContextRef.current = new AudioContextClass({
-              sampleRate: 44100
+              sampleRate: 44100,
+              latencyHint: 'interactive' // Add latency hint for better performance
             });
           }
-        }
 
-        // If context is suspended, don't proceed with initialization
-        if (audioContextRef.current.state === 'suspended') {
-          return;
+          // For Safari, we need to ensure the context is running
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+          }
         }
 
         // Check if we already have a source for this video
@@ -153,7 +154,8 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
         if (!audioContextRef.current) {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
           audioContextRef.current = new AudioContextClass({
-            sampleRate: 44100
+            sampleRate: 44100,
+            latencyHint: 'interactive' // Add latency hint for better performance
           });
         }
 
@@ -199,10 +201,12 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
     // Listen for user interactions
     document.addEventListener('click', handleUserInteraction);
     document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('touchend', handleUserInteraction); // Add touchend event
 
     return () => {
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('touchend', handleUserInteraction);
     };
   }, []);
 
