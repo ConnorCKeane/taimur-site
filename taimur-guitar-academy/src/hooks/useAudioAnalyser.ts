@@ -20,6 +20,7 @@ export function useAudioAnalyser(
   const hasUserInteractedRef = useRef(false);
   const isInitializedRef = useRef(false);
   const initializationPromiseRef = useRef<Promise<void> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     if (!video) {
@@ -47,12 +48,21 @@ export function useAudioAnalyser(
       initializationPromiseRef.current = (async () => {
         try {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioContext = audioContexts.get(video) || new AudioContextClass({
-            sampleRate: 44100,
-            latencyHint: 'interactive'
-          });
+          
+          // Create or reuse audio context
+          if (audioContextRef.current) {
+            audioContext = audioContextRef.current;
+          } else {
+            audioContext = new AudioContextClass({
+              sampleRate: 44100,
+              latencyHint: 'interactive'
+            });
+            audioContextRef.current = audioContext;
+          }
 
+          // Resume audio context if suspended
           if (audioContext.state === 'suspended') {
+            console.log('[Audio] Resuming suspended audio context');
             await audioContext.resume();
           }
 
@@ -151,6 +161,11 @@ export function useAudioAnalyser(
       hasUserInteractedRef.current = true;
 
       try {
+        // Resume audio context on user interaction
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          console.log('[Audio] Resuming audio context on user interaction');
+          await audioContextRef.current.resume();
+        }
         await initializeAudio();
       } catch (error) {
         console.error('[Audio] User interaction error:', error);
@@ -158,8 +173,11 @@ export function useAudioAnalyser(
       }
     };
 
-    document.addEventListener('pointerdown', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
+    // Add more event listeners for user interaction
+    const userInteractionEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+    userInteractionEvents.forEach(event => {
+      document.addEventListener(event, handleUserInteraction);
+    });
 
     if (video.readyState >= 2) {
       initializeAudio();
@@ -184,8 +202,9 @@ export function useAudioAnalyser(
     }
 
     return () => {
-      document.removeEventListener('pointerdown', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
+      userInteractionEvents.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
 
       if (mediaSource) {
         mediaSource.disconnect();

@@ -99,16 +99,21 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
       hasRealAudioRef.current = true;
     }
 
-    // If we don't have real audio yet and it's been less than 200ms since ready,
-    // or if we're not playing, show initial frame
-    if ((!hasRealAudioRef.current && elapsedSinceReady < 200) || !isPlaying) {
+    // Show initial frame if:
+    // 1. No real audio yet and it's been less than 200ms since ready
+    // 2. Not playing
+    // 3. Video is muted
+    if ((!hasRealAudioRef.current && elapsedSinceReady < 200) || !isPlaying || videoRef.current?.muted) {
       if (timestamp % 1000 < 16) { // Log roughly once per second
         console.log('[Visualizer] Showing initial frame:', {
-          reason: !hasRealAudioRef.current ? 'No real audio yet' : 'Not playing',
+          reason: !hasRealAudioRef.current ? 'No real audio yet' : 
+                 !isPlaying ? 'Not playing' : 
+                 'Video is muted',
           elapsedSinceReady,
           isPlaying,
           hasAudioData,
-          maxValue: Math.max(...dataArrayRef.current)
+          maxValue: Math.max(...dataArrayRef.current),
+          isMuted: videoRef.current?.muted
         });
       }
       for (let i = 0; i < 128; i++) {
