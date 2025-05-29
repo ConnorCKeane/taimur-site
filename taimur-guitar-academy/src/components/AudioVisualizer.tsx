@@ -29,7 +29,6 @@ const initialFrames = [
 export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const animationFrameRef = useRef<number>(0);
   const lastFrameRef = useRef<Uint8Array | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const storedFramesRef = useRef<Uint8Array[]>([]);
@@ -116,12 +115,18 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
     };
   }, [videoRef]);
 
-  // Add effect to handle user interaction
+  // Add effect to handle user interaction and audio context initialization
   useEffect(() => {
     const handleUserInteraction = async () => {
       if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
         try {
           await audioContextRef.current.resume();
+          // Force a re-render of the visualization
+          if (analyserRef.current) {
+            const dataArray = new Uint8Array(128);
+            analyserRef.current.getByteFrequencyData(dataArray);
+            lastFrameRef.current = dataArray.slice();
+          }
         } catch (error) {
           console.error('Error resuming audio context:', error);
         }
@@ -146,75 +151,85 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const drawFrame = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const barHeight = canvas.height / 128;
-      const barSpacing = 1;
-      const maxWidth = canvas.width * 0.8;
-      ctx.fillStyle = 'var(--background)';
+    let animationFrameId: number;
+    let lastTime = 0;
+    const frameInterval = 1000 / 60; // Target 60 FPS
 
-      // Always show visualization, even before audio context is ready
-      if (!analyserRef.current || !isInitializedRef.current) {
-        // Use initial frames if no audio data is available
-        if (storedFramesRef.current.length > 0) {
-          const frame = storedFramesRef.current[frameIndexRef.current];
+    const drawFrame = (timestamp: number) => {
+      // Calculate time elapsed since last frame
+      const elapsed = timestamp - lastTime;
+
+      // Only draw if enough time has passed
+      if (elapsed > frameInterval) {
+        lastTime = timestamp;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const barHeight = canvas.height / 128;
+        const barSpacing = 1;
+        const maxWidth = canvas.width * 0.8;
+        ctx.fillStyle = 'var(--background)';
+
+        // Always show visualization, even before audio context is ready
+        if (!analyserRef.current || !isInitializedRef.current) {
+          // Use initial frames if no audio data is available
+          if (storedFramesRef.current.length > 0) {
+            const frame = storedFramesRef.current[frameIndexRef.current];
+            for (let i = 0; i < 128; i++) {
+              const barWidth = (frame[i] / 255) * maxWidth;
+              const y = i * (barHeight + barSpacing);
+              ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
+            }
+            frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
+          }
+        } else if (isPlaying && analyserRef.current) {
+          const dataArray = new Uint8Array(128);
+          analyserRef.current.getByteFrequencyData(dataArray);
+
+          // Check if we have real audio data
+          if (dataArray.some(v => v > 0)) {
+            hasRealAudioRef.current = true;
+          }
+
+          if (!isMutedRef.current && hasRealAudioRef.current) {
+            // When not muted and we have real audio, store frames for later replay
+            if (dataArray.some(v => v > 0)) {
+              storedFramesRef.current.push(dataArray.slice());
+              // Keep only the last 180 frames (about 3 seconds at 60fps)
+              if (storedFramesRef.current.length > 180) {
+                storedFramesRef.current.shift();
+              }
+            }
+            lastFrameRef.current = dataArray.slice();
+          } else {
+            // When muted or no real audio yet, replay stored frames
+            if (storedFramesRef.current.length > 0) {
+              lastFrameRef.current = storedFramesRef.current[frameIndexRef.current];
+              frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
+            }
+          }
+        }
+
+        // Always draw the current frame
+        if (lastFrameRef.current) {
           for (let i = 0; i < 128; i++) {
-            const barWidth = (frame[i] / 255) * maxWidth;
+            const barWidth = (lastFrameRef.current[i] / 255) * maxWidth;
             const y = i * (barHeight + barSpacing);
             ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
           }
-          frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
-        }
-        return;
-      }
-
-      if (isPlaying && analyserRef.current) {
-        const dataArray = new Uint8Array(128);
-        analyserRef.current.getByteFrequencyData(dataArray);
-
-        // Check if we have real audio data
-        if (dataArray.some(v => v > 0)) {
-          hasRealAudioRef.current = true;
-        }
-
-        if (!isMutedRef.current && hasRealAudioRef.current) {
-          // When not muted and we have real audio, store frames for later replay
-          if (dataArray.some(v => v > 0)) {
-            storedFramesRef.current.push(dataArray.slice());
-            // Keep only the last 180 frames (about 3 seconds at 60fps)
-            if (storedFramesRef.current.length > 180) {
-              storedFramesRef.current.shift();
-            }
-          }
-          lastFrameRef.current = dataArray.slice();
-        } else {
-          // When muted or no real audio yet, replay stored frames
-          if (storedFramesRef.current.length > 0) {
-            lastFrameRef.current = storedFramesRef.current[frameIndexRef.current];
-            frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
-          }
         }
       }
 
-      // Always draw the current frame
-      if (lastFrameRef.current) {
-        for (let i = 0; i < 128; i++) {
-          const barWidth = (lastFrameRef.current[i] / 255) * maxWidth;
-          const y = i * (barHeight + barSpacing);
-          ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
-        }
-      }
+      // Request next frame
+      animationFrameId = requestAnimationFrame(drawFrame);
     };
 
-    const animate = () => {
-      drawFrame();
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-    animate();
+    // Start animation loop
+    animationFrameId = requestAnimationFrame(drawFrame);
 
+    // Cleanup
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [videoRef, canvasHeight, isPlaying]);
