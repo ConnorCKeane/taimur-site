@@ -102,8 +102,8 @@ export function useAudioAnalyser(
                     muted: video.muted,
                     gain: gainNode.gain.value,
                     contextState: audioContext?.state,
-                    analyserConnected: analyserNode?.numberOfInputs > 0,
-                    mediaSourceConnected: mediaSource?.numberOfOutputs > 0,
+                    analyserConnected: analyserNode && analyserNode.numberOfInputs > 0,
+                    mediaSourceConnected: mediaSource && mediaSource.numberOfOutputs > 0,
                     analyserGain: analyserGain.gain.value,
                     splitterConnected: splitter.numberOfOutputs > 0
                   });
@@ -118,8 +118,8 @@ export function useAudioAnalyser(
               // Log initial audio graph state
               console.log('[Audio] Graph initialized:', {
                 contextState: audioContext.state,
-                analyserConnected: analyserNode?.numberOfInputs > 0,
-                mediaSourceConnected: mediaSource?.numberOfOutputs > 0,
+                analyserConnected: analyserNode && analyserNode.numberOfInputs > 0,
+                mediaSourceConnected: mediaSource && mediaSource.numberOfOutputs > 0,
                 gainValue: gainNode.gain.value,
                 videoMuted: video.muted,
                 videoPaused: video.paused,

@@ -51,5 +51,5 @@ export function useAnimationFrame(callback: (timestamp: number) => void) {
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [memoizedCallback]);
+  }, [memoizedCallback, frameInterval]);
 } 

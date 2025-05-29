@@ -133,7 +133,7 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
   // Reset real audio flag when video changes
   useEffect(() => {
     hasRealAudioRef.current = false;
-  }, [videoRef.current]);
+  }, [videoRef]);
 
   return (
     <canvas
