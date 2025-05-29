@@ -150,27 +150,54 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
       isHandlingInteraction = true;
 
       console.log('User interaction detected - audio context state:', audioContextRef.current?.state);
-      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-        try {
+      
+      try {
+        // Create new audio context if it doesn't exist
+        if (!audioContextRef.current) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioContextRef.current = new AudioContextClass();
+          console.log('Created new AudioContext after user interaction');
+        }
+
+        // Resume audio context if suspended
+        if (audioContextRef.current.state === 'suspended') {
           console.log('Resuming audio context...');
           await audioContextRef.current.resume();
           console.log('Audio context resumed:', audioContextRef.current.state);
-          
-          // Force a re-render of the visualization
-          if (analyserRef.current) {
-            const dataArray = new Uint8Array(128);
-            analyserRef.current.getByteFrequencyData(dataArray);
-            const hasAudioData = dataArray.some(v => v > 0);
-            console.log('Initial audio data check - hasData:', hasAudioData);
-            if (hasAudioData) {
-              console.log('Real audio data detected');
-              hasRealAudioRef.current = true;
-            }
-            lastFrameRef.current = dataArray.slice();
-          }
-        } catch (error) {
-          console.error('Error resuming audio context:', error);
         }
+
+        // Initialize audio nodes if not already initialized
+        if (!isInitializedRef.current && videoRef.current) {
+          console.log('Initializing audio nodes after user interaction');
+          const source = audioContextRef.current.createMediaElementSource(videoRef.current);
+          const analyser = audioContextRef.current.createAnalyser();
+          const gainNode = audioContextRef.current.createGain();
+
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.8;
+
+          source.connect(analyser);
+          analyser.connect(audioContextRef.current.destination);
+
+          audioContexts.set(videoRef.current, audioContextRef.current);
+          mediaElementSources.set(videoRef.current, source);
+          gainNodes.set(videoRef.current, gainNode);
+          analyserRef.current = analyser;
+          isInitializedRef.current = true;
+
+          // Force a re-render of the visualization
+          const dataArray = new Uint8Array(128);
+          analyser.getByteFrequencyData(dataArray);
+          const hasAudioData = dataArray.some(v => v > 0);
+          console.log('Initial audio data check - hasData:', hasAudioData);
+          if (hasAudioData) {
+            console.log('Real audio data detected');
+            hasRealAudioRef.current = true;
+          }
+          lastFrameRef.current = dataArray.slice();
+        }
+      } catch (error) {
+        console.error('Error handling user interaction:', error);
       }
 
       isHandlingInteraction = false;
