@@ -52,6 +52,8 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
   useEffect(() => {
     if (!videoRef.current || isInitializedRef.current) return;
 
+    let cleanup: (() => void) | undefined;
+
     const initializeAudio = async () => {
       try {
         console.log('Initializing audio context...');
@@ -65,6 +67,12 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
         // If context is suspended, don't proceed with initialization
         if (audioContextRef.current.state === 'suspended') {
           console.log('AudioContext is suspended, waiting for user interaction');
+          return;
+        }
+
+        // Check if we already have a source for this video
+        if (mediaElementSources.has(videoRef.current!)) {
+          console.log('Audio source already exists for this video');
           return;
         }
 
@@ -92,7 +100,7 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
         console.log('Initial mute state:', isMutedRef.current);
 
         // Listen for mute state changes
-        videoRef.current?.addEventListener('volumechange', () => {
+        const handleVolumeChange = () => {
           const newMutedState = videoRef.current?.muted || false;
           console.log('Mute state changed:', newMutedState);
           isMutedRef.current = newMutedState;
@@ -102,10 +110,23 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
             frameIndexRef.current = 0;
             hasRealAudioRef.current = false;
           }
-        });
+        };
+
+        videoRef.current?.addEventListener('volumechange', handleVolumeChange);
 
         isInitializedRef.current = true;
         console.log('Audio initialization complete');
+
+        // Set cleanup function
+        cleanup = () => {
+          videoRef.current?.removeEventListener('volumechange', handleVolumeChange);
+          if (audioContextRef.current) {
+            console.log('Cleaning up audio context');
+            audioContextRef.current.close();
+            audioContextRef.current = null;
+          }
+          isInitializedRef.current = false;
+        };
       } catch (error) {
         console.error('Error initializing audio:', error);
       }
@@ -116,18 +137,18 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
     // Cleanup function
     return () => {
-      if (audioContextRef.current) {
-        console.log('Cleaning up audio context');
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-      isInitializedRef.current = false;
+      if (cleanup) cleanup();
     };
   }, [videoRef]);
 
   // Add effect to handle user interaction and audio context initialization
   useEffect(() => {
+    let isHandlingInteraction = false;
+
     const handleUserInteraction = async () => {
+      if (isHandlingInteraction) return;
+      isHandlingInteraction = true;
+
       console.log('User interaction detected');
       if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
         try {
@@ -149,6 +170,8 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
           console.error('Error resuming audio context:', error);
         }
       }
+
+      isHandlingInteraction = false;
     };
 
     // Listen for user interactions
