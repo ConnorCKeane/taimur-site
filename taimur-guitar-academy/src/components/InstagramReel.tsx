@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Loader2, Volume2, VolumeX, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { Loader2, Volume2, VolumeX, Instagram } from 'lucide-react';
+import AudioVisualizer from './AudioVisualizer';
 
 interface Reel {
   id: string;
@@ -34,6 +35,9 @@ export default function InstagramReel() {
   const [isMuted, setIsMuted] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoBoxRef = useRef<HTMLDivElement>(null);
+  const [videoBoxHeight, setVideoBoxHeight] = useState(0);
+  const [showFlag, setShowFlag] = useState(true);
 
   const handleVideoLoad = () => {
     setIsLoading(false);
@@ -55,19 +59,11 @@ export default function InstagramReel() {
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    setIsMuted((prev) => !prev);
   };
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? reels.length - 1 : prev - 1));
-    setIsLoading(true);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === reels.length - 1 ? 0 : prev + 1));
+  const handleReelChange = (index: number) => {
+    setCurrentIndex(index);
     setIsLoading(true);
   };
 
@@ -80,103 +76,120 @@ export default function InstagramReel() {
     setIsPlaying(true);
   }, [currentIndex]);
 
+  useLayoutEffect(() => {
+    if (videoBoxRef.current) {
+      setVideoBoxHeight(videoBoxRef.current.offsetHeight);
+    }
+  }, [currentIndex, isLoading]);
+
+  // Hide flag after 4 seconds or when unmuted
+  useEffect(() => {
+    if (!isMuted) {
+      setShowFlag(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowFlag(false), 4000);
+    return () => clearTimeout(timer);
+  }, [isMuted]);
+
   return (
-    <div className="flex items-center justify-center gap-4">
-      {/* Left Arrow (completely outside) */}
-      <button
-        onClick={handlePrev}
-        className="p-2 rounded-full focus:outline-none z-20"
-        style={{ color: 'var(--background)', background: 'none' }}
-        aria-label="Previous Reel"
-      >
-        <ChevronLeft className="w-7 h-7" />
-      </button>
-
-      {/* Video Demo Box */}
-      <div className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-2 border-background z-10">
-        {/* Video Container */}
-        <div className="relative w-full h-full bg-gray-900">
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            playsInline
-            loop
-            autoPlay
-            muted={isMuted}
-            onLoadedData={handleVideoLoad}
-            onClick={togglePlay}
-          >
-            <source src={reels[currentIndex].videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <Loader2 className="w-8 h-8 text-white animate-spin" />
-            </div>
-          )}
-
-          {/* Play/Pause Overlay */}
-          {!isLoading && !isPlaying && (
-            <div
-              className="absolute inset-0 flex items-center justify-center cursor-pointer"
+    <div className="flex flex-col items-center gap-4">
+      {/* Video Demo Box Container with padding for visualization */}
+      <div className="relative pl-16" style={{overflow: 'visible'}}>
+        {/* Audio Visualizer absolutely positioned to the left, full height of video box */}
+        {isPlaying && videoRef.current && (
+          <AudioVisualizer videoRef={videoRef} height={videoBoxHeight} gain={isMuted ? 0 : 1} />
+        )}
+        {/* Video Demo Box */}
+        <div ref={videoBoxRef} className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-4 border-background z-10">
+          {/* Video Container */}
+          <div className="relative w-full h-full bg-gray-900">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              playsInline
+              loop
+              autoPlay
+              onLoadedData={handleVideoLoad}
               onClick={togglePlay}
             >
-              <div className="w-12 h-12 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+              <source src={reels[currentIndex].videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+
+            {/* Loading State */}
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
               </div>
-            </div>
-          )}
-
-          {/* Volume Toggle Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleMute();
-            }}
-            className="absolute top-3 right-3 p-1.5 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
-          >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4" />
-            ) : (
-              <Volume2 className="w-4 h-4" />
             )}
-          </button>
 
-          {/* Instagram Link */}
-          <a
-            href="https://instagram.com/taimurmasud"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-3 left-3 p-1.5 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Instagram className="w-4 h-4" />
-          </a>
+            {/* Play/Pause Overlay */}
+            {!isLoading && !isPlaying && (
+              <div
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                onClick={togglePlay}
+              >
+                <div className="w-12 h-12 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+            )}
+
+            {/* Volume Toggle Button */}
+            <div className="absolute top-3 right-3 flex flex-col items-end gap-2 z-20">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMute();
+                }}
+                className="p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
+                id="volume-btn"
+                style={{ fontSize: '1.5rem' }}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-6 h-6" />
+                ) : (
+                  <Volume2 className="w-6 h-6" />
+                )}
+              </button>
+              <a
+                href="https://instagram.com/taimurmasud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+                style={{ fontSize: '1.5rem' }}
+              >
+                <Instagram className="w-6 h-6" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Instagram Handle */}
-      <div className="absolute -bottom-5 right-16 text-black text-xs font-medium">
-        @taimurmasud
+      {/* Navigation Dots */}
+      <div className="flex gap-2 mt-2">
+        {reels.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleReelChange(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+              currentIndex === index
+                ? 'bg-black scale-125'
+                : 'bg-gray-400 hover:bg-gray-600'
+            }`}
+            aria-label={`Go to reel ${index + 1}`}
+          />
+        ))}
       </div>
 
-      {/* Right Arrow (completely outside) */}
-      <button
-        onClick={handleNext}
-        className="p-2 rounded-full focus:outline-none z-20"
-        style={{ color: 'var(--background)', background: 'none' }}
-        aria-label="Next Reel"
-      >
-        <ChevronRight className="w-7 h-7" />
-      </button>
     </div>
   );
 } 
