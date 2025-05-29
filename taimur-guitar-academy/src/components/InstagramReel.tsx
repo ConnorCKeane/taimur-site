@@ -37,60 +37,74 @@ export default function InstagramReel() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoBoxRef = useRef<HTMLDivElement>(null);
   const [videoBoxHeight, setVideoBoxHeight] = useState(0);
+  const preloadedVideos = useRef<HTMLVideoElement[]>([]);
+
+  // Preload next video
+  useEffect(() => {
+    const nextIndex = (currentIndex + 1) % reels.length;
+    const nextVideo = document.createElement('video');
+    nextVideo.src = reels[nextIndex].videoUrl;
+    nextVideo.preload = 'auto';
+    preloadedVideos.current = [nextVideo];
+  }, [currentIndex]);
 
   const handleVideoLoad = () => {
     setIsLoading(false);
-    // Only attempt to play if the video is not muted (user has interacted)
-    if (videoRef.current && !isMuted) {
-      videoRef.current.play().catch(() => {
-        // If autoplay fails, we'll let the user click to play
+    if (videoRef.current) {
+      // Start muted for autoplay
+      videoRef.current.muted = true;
+      videoRef.current.volume = 0;
+      videoRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
         setIsPlaying(false);
       });
     }
   };
+
+  // Handle initial load and reel changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.muted = isMuted;
+      videoRef.current.volume = isMuted ? 0 : 1;
+      videoRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        setIsPlaying(false);
+      });
+    }
+  }, [currentIndex]);
 
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
-        videoRef.current.play().catch((error) => {
-          console.log('Playback failed:', error);
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {
           setIsPlaying(false);
         });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-    // When unmuting, try to play the video
-    if (videoRef.current && isMuted) {
-      videoRef.current.play().catch(() => {
-        // If autoplay fails, we'll let the user click to play
-        setIsPlaying(false);
-      });
+    if (videoRef.current) {
+      const newMutedState = !isMuted;
+      videoRef.current.muted = newMutedState;
+      videoRef.current.volume = newMutedState ? 0 : 1;
+      setIsMuted(newMutedState);
     }
   };
 
   const handleReelChange = (index: number) => {
     setCurrentIndex(index);
     setIsLoading(true);
-    setIsPlaying(false); // Reset playing state when changing reels
+    setIsPlaying(false);
   };
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      // Only attempt to play if the video is not muted (user has interacted)
-      if (!isMuted) {
-        videoRef.current.play().catch(() => {
-          setIsPlaying(false);
-        });
-      }
-    }
-  }, [currentIndex, isMuted]);
 
   useLayoutEffect(() => {
     if (videoBoxRef.current) {
@@ -103,9 +117,11 @@ export default function InstagramReel() {
       {/* Video Demo Box Container with padding for visualization */}
       <div className="relative pl-16" style={{overflow: 'visible'}}>
         {/* Audio Visualizer absolutely positioned to the left, full height of video box */}
-        {videoRef.current && (
-          <AudioVisualizer videoRef={videoRef as React.RefObject<HTMLVideoElement>} height={videoBoxHeight} gain={isMuted ? 0 : 1} isPlaying={isPlaying} />
-        )}
+        <AudioVisualizer 
+          videoRef={videoRef as React.RefObject<HTMLVideoElement>} 
+          height={videoBoxHeight} 
+          isPlaying={isPlaying} 
+        />
         {/* Video Demo Box */}
         <div ref={videoBoxRef} className="relative w-56 sm:w-72 lg:w-80 aspect-[9/16] rounded-2xl overflow-hidden shadow-lg bg-gray-300 border-4 border-background z-10">
           {/* Video Container */}
@@ -116,6 +132,7 @@ export default function InstagramReel() {
               playsInline
               loop
               muted={isMuted}
+              preload="auto"
               onLoadedData={handleVideoLoad}
               onClick={togglePlay}
             >
