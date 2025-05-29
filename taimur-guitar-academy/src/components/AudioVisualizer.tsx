@@ -149,7 +149,7 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
       if (isHandlingInteraction) return;
       isHandlingInteraction = true;
 
-      console.log('User interaction detected');
+      console.log('User interaction detected - audio context state:', audioContextRef.current?.state);
       if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
         try {
           console.log('Resuming audio context...');
@@ -160,7 +160,9 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
           if (analyserRef.current) {
             const dataArray = new Uint8Array(128);
             analyserRef.current.getByteFrequencyData(dataArray);
-            if (dataArray.some(v => v > 0)) {
+            const hasAudioData = dataArray.some(v => v > 0);
+            console.log('Initial audio data check - hasData:', hasAudioData);
+            if (hasAudioData) {
               console.log('Real audio data detected');
               hasRealAudioRef.current = true;
             }
@@ -212,6 +214,7 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
         // Always show visualization, even before audio context is ready
         if (!analyserRef.current || !isInitializedRef.current) {
+          console.log('Using initial frames - analyser:', !!analyserRef.current, 'initialized:', isInitializedRef.current);
           // Use initial frames if no audio data is available
           if (storedFramesRef.current.length > 0) {
             const frame = storedFramesRef.current[frameIndexRef.current];
@@ -226,8 +229,12 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
           const dataArray = new Uint8Array(128);
           analyserRef.current.getByteFrequencyData(dataArray);
 
+          // Log audio data state
+          const hasAudioData = dataArray.some(v => v > 0);
+          console.log('Audio state - playing:', isPlaying, 'muted:', isMutedRef.current, 'hasRealAudio:', hasRealAudioRef.current, 'hasAudioData:', hasAudioData);
+
           // Check if we have real audio data
-          if (dataArray.some(v => v > 0)) {
+          if (hasAudioData) {
             if (!hasRealAudioRef.current) {
               console.log('Real audio data detected during playback');
               hasRealAudioRef.current = true;
@@ -236,12 +243,13 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
           if (!isMutedRef.current && hasRealAudioRef.current) {
             // When not muted and we have real audio, store frames for later replay
-            if (dataArray.some(v => v > 0)) {
+            if (hasAudioData) {
               storedFramesRef.current.push(dataArray.slice());
               // Keep only the last 180 frames (about 3 seconds at 60fps)
               if (storedFramesRef.current.length > 180) {
                 storedFramesRef.current.shift();
               }
+              console.log('Stored frames count:', storedFramesRef.current.length);
             }
             lastFrameRef.current = dataArray.slice();
           } else {
@@ -249,12 +257,15 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
             if (storedFramesRef.current.length > 0) {
               lastFrameRef.current = storedFramesRef.current[frameIndexRef.current];
               frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
+              console.log('Replaying stored frame:', frameIndexRef.current, 'of', storedFramesRef.current.length);
             }
           }
         }
 
         // Always draw the current frame
         if (lastFrameRef.current) {
+          const frameHasData = lastFrameRef.current.some(v => v > 0);
+          console.log('Drawing frame - hasData:', frameHasData, 'frameIndex:', frameIndexRef.current);
           for (let i = 0; i < 128; i++) {
             const barWidth = (lastFrameRef.current[i] / 255) * maxWidth;
             const y = i * (barHeight + barSpacing);
@@ -267,11 +278,13 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
       animationFrameId = requestAnimationFrame(drawFrame);
     };
 
+    console.log('Starting animation loop - canvas size:', canvas.width, 'x', canvas.height);
     // Start animation loop
     animationFrameId = requestAnimationFrame(drawFrame);
 
     // Cleanup
     return () => {
+      console.log('Cleaning up animation loop');
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
