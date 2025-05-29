@@ -43,17 +43,32 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
   const canvasHeight = height > 0 ? Math.max(0, height - verticalPadding * 2 - 60) : 220;
   const canvasWidth = 64;
 
+  // Initialize stored frames immediately
+  useEffect(() => {
+    storedFramesRef.current = initialFrames.map(frame => new Uint8Array(frame));
+    frameIndexRef.current = 0;
+  }, []);
+
   // Initialize audio context when video is available
   useEffect(() => {
     if (!videoRef.current || isInitializedRef.current) return;
 
     const initializeAudio = async () => {
       try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioContextClass();
-        const source = audioContext.createMediaElementSource(videoRef.current!);
-        const analyser = audioContext.createAnalyser();
-        const gainNode = audioContext.createGain();
+        // Only create AudioContext if it doesn't exist
+        if (!audioContextRef.current) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioContextRef.current = new AudioContextClass();
+        }
+
+        // If context is suspended, don't proceed with initialization
+        if (audioContextRef.current.state === 'suspended') {
+          return;
+        }
+
+        const source = audioContextRef.current.createMediaElementSource(videoRef.current!);
+        const analyser = audioContextRef.current.createAnalyser();
+        const gainNode = audioContextRef.current.createGain();
 
         // Configure analyser for better visualization
         analyser.fftSize = 256;
@@ -61,19 +76,13 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
 
         // Connect nodes - connect analyser directly to destination for visualization
         source.connect(analyser);
-        analyser.connect(audioContext.destination);
+        analyser.connect(audioContextRef.current.destination);
         
         // Store references
-        audioContexts.set(videoRef.current!, audioContext);
+        audioContexts.set(videoRef.current!, audioContextRef.current);
         mediaElementSources.set(videoRef.current!, source);
         gainNodes.set(videoRef.current!, gainNode);
         analyserRef.current = analyser;
-        audioContextRef.current = audioContext;
-
-        // Resume audio context if it was suspended
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
 
         // Set initial mute state
         isMutedRef.current = videoRef.current?.muted || false;
@@ -88,10 +97,6 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
           }
         });
 
-        // Initialize stored frames with the initial frames
-        storedFramesRef.current = initialFrames.map(frame => new Uint8Array(frame));
-        frameIndexRef.current = 0;
-
         isInitializedRef.current = true;
       } catch (error) {
         console.error('Error initializing audio:', error);
@@ -105,10 +110,33 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
     return () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
+        audioContextRef.current = null;
       }
       isInitializedRef.current = false;
     };
   }, [videoRef]);
+
+  // Add effect to handle user interaction
+  useEffect(() => {
+    const handleUserInteraction = async () => {
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        try {
+          await audioContextRef.current.resume();
+        } catch (error) {
+          console.error('Error resuming audio context:', error);
+        }
+      }
+    };
+
+    // Listen for user interactions
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -124,6 +152,21 @@ export default function AudioVisualizer({ videoRef, height, isPlaying }: AudioVi
       const barSpacing = 1;
       const maxWidth = canvas.width * 0.8;
       ctx.fillStyle = 'var(--background)';
+
+      // Always show visualization, even before audio context is ready
+      if (!analyserRef.current || !isInitializedRef.current) {
+        // Use initial frames if no audio data is available
+        if (storedFramesRef.current.length > 0) {
+          const frame = storedFramesRef.current[frameIndexRef.current];
+          for (let i = 0; i < 128; i++) {
+            const barWidth = (frame[i] / 255) * maxWidth;
+            const y = i * (barHeight + barSpacing);
+            ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
+          }
+          frameIndexRef.current = (frameIndexRef.current + 1) % storedFramesRef.current.length;
+        }
+        return;
+      }
 
       if (isPlaying && analyserRef.current) {
         const dataArray = new Uint8Array(128);
