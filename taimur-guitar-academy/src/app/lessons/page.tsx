@@ -93,43 +93,43 @@ export default function LessonsPage() {
 
         {/* Lesson Features Grid */}
         <motion.div
-          className="py-2"
+          className="py-2 w-full overflow-x-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <div className="grid grid-cols-4 gap-2 w-full overflow-x-auto">
+          <div className="flex flex-row gap-2 w-full min-w-0">
             {/* Personalized Plan */}
-            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0">
-              <svg className="h-8 w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
+              <svg className="h-7 w-7 md:h-8 md:w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <h3 className="text-base font-semibold text-black leading-tight">Personalized Plan</h3>
-              <p className="text-xs text-gray-800 leading-tight">Tailored lessons to your goals and skill level.</p>
+              <h3 className="text-xs md:text-sm lg:text-base font-semibold text-black leading-tight">Personalized Plan</h3>
+              <p className="text-[10px] md:text-xs text-gray-800 leading-tight">Tailored lessons to your goals and skill level.</p>
             </div>
             {/* Live Video Call */}
-            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0">
-              <svg className="h-8 w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
+              <svg className="h-7 w-7 md:h-8 md:w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              <h3 className="text-base font-semibold text-black leading-tight">Live Video Call</h3>
-              <p className="text-xs text-gray-800 leading-tight">Interactive sessions from the comfort of your home.</p>
+              <h3 className="text-xs md:text-sm lg:text-base font-semibold text-black leading-tight">Live Video Call</h3>
+              <p className="text-[10px] md:text-xs text-gray-800 leading-tight">Interactive sessions from the comfort of your home.</p>
             </div>
             {/* Technique Focus */}
-            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0">
-              <svg className="h-8 w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
+              <svg className="h-7 w-7 md:h-8 md:w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
-              <h3 className="text-base font-semibold text-black leading-tight">Technique Focus</h3>
-              <p className="text-xs text-gray-800 leading-tight">Master essential guitar techniques with expert guidance.</p>
+              <h3 className="text-xs md:text-sm lg:text-base font-semibold text-black leading-tight">Technique Focus</h3>
+              <p className="text-[10px] md:text-xs text-gray-800 leading-tight">Master essential guitar techniques with expert guidance.</p>
             </div>
             {/* Progress Tracking */}
-            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0">
-              <svg className="h-8 w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
+              <svg className="h-7 w-7 md:h-8 md:w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              <h3 className="text-base font-semibold text-black leading-tight">Progress Tracking</h3>
-              <p className="text-xs text-gray-800 leading-tight">Monitor your improvement and celebrate milestones.</p>
+              <h3 className="text-xs md:text-sm lg:text-base font-semibold text-black leading-tight">Progress Tracking</h3>
+              <p className="text-[10px] md:text-xs text-gray-800 leading-tight">Monitor your improvement and celebrate milestones.</p>
             </div>
           </div>
         </motion.div>

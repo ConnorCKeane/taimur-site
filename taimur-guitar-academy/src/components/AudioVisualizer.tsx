@@ -72,7 +72,9 @@ export default function AudioVisualizer({ videoRef, height, isPlaying, hasUserIn
   const drawSimulated = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     const currentFrame = SIMULATED_FRAMES[animationFrameIndexRef.current];
     for (let i = 0; i < 128; i++) {
-      const barWidth = (currentFrame[i] / 255) * maxWidth;
+      const norm = currentFrame[i] / 255;
+      const exaggerated = Math.pow(norm, 1.5);
+      const barWidth = exaggerated * maxWidth;
       const y = i * (barHeight + barSpacing);
       ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
     }
@@ -82,7 +84,9 @@ export default function AudioVisualizer({ videoRef, height, isPlaying, hasUserIn
     if (!analyser) return;
     analyser.getByteFrequencyData(dataArrayRef.current);
     for (let i = 0; i < 128; i++) {
-      const barWidth = (dataArrayRef.current[i] / 255) * maxWidth;
+      const norm = dataArrayRef.current[i] / 255;
+      const exaggerated = Math.pow(norm, 1.5);
+      const barWidth = exaggerated * maxWidth;
       const y = i * (barHeight + barSpacing);
       ctx.fillRect(canvas.width - barWidth, y, barWidth, barHeight);
     }
