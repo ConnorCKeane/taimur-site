@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "Taimur's Guitar Academy",
   description: "Professional guitar lessons with Taimur - Learn guitar from an experienced musician",
   keywords: "guitar lessons, music education, guitar teacher, online guitar lessons",
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
