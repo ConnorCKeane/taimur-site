@@ -12,7 +12,7 @@ A modern, responsive website for Taimur's Guitar Academy built with Next.js 15, 
 - 📝 SEO optimized
 - ♿ Accessibility compliant
 
-## Pages
+## Pages t
 
 - **Home**: Showcases Taimur's musical background and teaching philosophy
 - **Services**: Details about guitar lessons and pricing
