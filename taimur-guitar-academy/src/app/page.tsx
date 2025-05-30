@@ -61,13 +61,13 @@ export default function Home() {
             <div className="flex flex-row items-center justify-center gap-2 mb-10">
               <Link
                 href="/lessons"
-                className="rounded-md bg-background px-4 py-2 text-sm font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
+                className="rounded-md bg-background px-6 py-3 text-base font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
               >
                 Book a Lesson
               </Link>
               <Link
                 href="/shop"
-                className="text-sm font-semibold text-background hover:text-[#6B7280] transition-colors"
+                className="text-base font-semibold text-background hover:text-[#6B7280] px-6 py-3 rounded-md transition-colors"
               >
                 Shop <span aria-hidden="true">→</span>
               </Link>
@@ -152,13 +152,13 @@ export default function Home() {
             <div className="flex flex-row items-center gap-2 mt-4">
               <Link
                 href="/lessons"
-                className="rounded-md bg-background px-4 py-2 text-sm font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
+                className="rounded-md bg-background px-6 py-3 text-base font-semibold text-white shadow-[0_0_15px_rgba(69,67,73,0.3)] hover:shadow-[0_0_20px_rgba(69,67,73,0.4)] transition-all duration-300"
               >
                 Book a Lesson
               </Link>
               <Link
                 href="/shop"
-                className="text-sm font-semibold text-background hover:text-[#6B7280] transition-colors"
+                className="text-base font-semibold text-background hover:text-[#6B7280] px-6 py-3 rounded-md transition-colors"
               >
                 Shop <span aria-hidden="true">→</span>
               </Link>

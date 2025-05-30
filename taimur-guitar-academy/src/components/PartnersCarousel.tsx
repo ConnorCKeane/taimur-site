@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
+import { Users2, Eye, Heart } from 'lucide-react';
 
 const partners = [
   {
@@ -33,23 +34,24 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
 
   return (
     <div className="flex justify-center w-full py-8">
-      <div className="w-full max-w-3xl rounded-3xl bg-[#232326] bg-opacity-90 shadow-2xl px-0 pt-4 pb-8 flex flex-col items-center border border-white/10 overflow-hidden relative">
+      <div className="w-full max-w-3xl rounded-3xl bg-[#232326] bg-opacity-90 shadow-2xl px-0 pt-8 pb-10 flex flex-col items-center border border-white/10 overflow-hidden relative">
         {/* Call to Action Above Carousel */}
-        <div className="text-center mb-8 mt-12 sm:mt-8">
-          <h3 className="text-xl font-semibold text-white mb-2">Become a Sponsor</h3>
-          <p className="text-white/90 mb-4 max-w-md mx-auto">
-            Join our network of premium partners and connect with passionate musicians and students.
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Become a Sponsor</h3>
+          <p className="text-white/90 mb-5 max-w-lg mx-auto text-base font-medium">
+            Put your product in front of thousands of passionate musicians and students.<br />
+
           </p>
           <button
             type="button"
             onClick={onContactClick}
-            className="inline-block rounded-md bg-transparent px-4 py-2 text-sm font-semibold text-white border border-white shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300"
+            className="inline-block rounded-md bg-transparent px-5 py-2 text-base font-semibold text-white border border-white shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300"
           >
-            Partner With Me
+            Get In Touch
           </button>
         </div>
         {/* Animated Carousel */}
-        <div className="relative w-full overflow-hidden">
+        <div className="relative w-full overflow-hidden pt-2">
           <motion.div
             className="flex gap-12 items-center"
             animate={{ x: [0, -((carouselPartners.length / 2) * 180)] }}
@@ -79,6 +81,21 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
               </div>
             ))}
           </motion.div>
+        </div>
+        {/* Stats Row Below Carousel */}
+        <div className="w-full flex flex-row justify-center items-center gap-8 mt-10">
+          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
+            <Users2 className="w-5 h-5" />
+            160,000+ <span className="font-normal">followers</span>
+          </div>
+          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
+            <Eye className="w-5 h-5" />
+            100,000,000+ <span className="font-normal">views</span>
+          </div>
+          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
+            <Heart className="w-5 h-5" />
+            45,000,000+ <span className="font-normal">likes</span>
+          </div>
         </div>
       </div>
     </div>

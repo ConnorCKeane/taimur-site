@@ -31,9 +31,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ id: session.id });
   } catch (error) {
-    console.error('Error:', error);
+    const err = error as Error;
+    console.error('Stripe error:', err.message, err.stack, error);
     return NextResponse.json(
-      { error: 'Error creating checkout session' },
+      { error: err.message || 'Error creating checkout session' },
       { status: 500 }
     );
   }

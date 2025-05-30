@@ -51,6 +51,12 @@ export default function BookingModal({
 
       const session = await response.json();
 
+      if (!session.id) {
+        alert(session.error || 'Could not create checkout session. Please try again.');
+        setIsProcessing(false);
+        return;
+      }
+
       // Redirect to Stripe Checkout
       if (stripe) {
         const { error } = await stripe.redirectToCheckout({
