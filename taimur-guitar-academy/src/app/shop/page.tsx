@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import { SpeakerWaveIcon, FilmIcon, AcademicCapIcon, MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRef } from 'react';
@@ -69,7 +69,7 @@ export default function ShopPage() {
                 <FilmIcon className="h-8 w-8 text-black" />
               </div>
               <h3 className="text-base font-semibold text-black leading-tight">Intro & Song Overview</h3>
-              <p className="text-xs text-gray-800 leading-tight">Get inspired and see what you'll learn</p>
+              <p className="text-xs text-gray-800 leading-tight">Get inspired and see what you&apos;ll learn</p>
             </div>
             {/* Step-by-Step Lessons */}
             <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0">
