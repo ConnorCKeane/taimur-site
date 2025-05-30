@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, format, addDays as addDaysFn, isBefore, isAfter, isSameMonth as isSameMonthFn } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
@@ -6,9 +6,10 @@ interface SimpleCalendarProps {
   onDateSelect: (date: Date) => void;
   selectedDate: Date | null;
   darkMode?: boolean;
+  initialMonth?: Date;
 }
 
-export default function SimpleCalendar({ onDateSelect, selectedDate, darkMode }: SimpleCalendarProps) {
+export default function SimpleCalendar({ onDateSelect, selectedDate, darkMode, initialMonth }: SimpleCalendarProps) {
   const timeZone = 'America/New_York';
   const now = new Date();
   const today = toZonedTime(now, timeZone);
@@ -16,8 +17,15 @@ export default function SimpleCalendar({ onDateSelect, selectedDate, darkMode }:
   const maxDate = addMonths(today, 1); // 1 month ahead
   const maxNavMonth = addMonths(startOfMonth(today), 2); // 2 months ahead
 
-  // Initialize currentMonth to the current month in EST/EDT
-  const [currentMonth, setCurrentMonth] = useState(startOfMonth(today));
+  // Initialize currentMonth to initialMonth if provided, else current month
+  const [currentMonth, setCurrentMonth] = useState(initialMonth ? startOfMonth(initialMonth) : startOfMonth(today));
+
+  // Sync currentMonth with initialMonth if it changes after mount
+  useEffect(() => {
+    if (initialMonth) {
+      setCurrentMonth(startOfMonth(initialMonth));
+    }
+  }, [initialMonth]);
 
   const canGoPrev = isAfter(currentMonth, startOfMonth(today));
   const canGoNext = isBefore(currentMonth, maxNavMonth);
@@ -110,7 +118,7 @@ export default function SimpleCalendar({ onDateSelect, selectedDate, darkMode }:
   };
 
   return (
-    <div className={darkMode ? 'bg-[#232326] rounded-xl shadow p-4 w-full max-w-md mx-auto border border-white/10' : 'bg-white rounded-xl shadow p-4 w-full max-w-md mx-auto'}>
+    <div className={darkMode ? 'bg-[#232326] rounded-xl shadow p-4 w-full max-w-md mx-auto border border-white/10 flex flex-col h-full min-h-full max-h-full justify-between' : 'bg-white rounded-xl shadow p-4 w-full max-w-md mx-auto flex flex-col h-full min-h-full max-h-full justify-between'}>
       {renderHeader()}
       {renderDays()}
       {renderCells()}

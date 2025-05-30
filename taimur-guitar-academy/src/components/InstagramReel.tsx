@@ -207,6 +207,10 @@ export default function InstagramReel() {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('volumechange', handleVolumeChange);
+      // Pause and reset video on unmount to prevent play() errors
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
     };
   }, [handleUserInteraction, hasUserInteracted]);
 
