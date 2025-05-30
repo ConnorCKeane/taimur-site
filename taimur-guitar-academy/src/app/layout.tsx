@@ -18,11 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth dark" style={{ colorScheme: 'dark' }}>
       <head>
         <meta name="theme-color" content="#18181A" />
+        <meta name="color-scheme" content="dark" />
       </head>
-      <body className={`${inter.className} antialiased bg-background`}>
+      <body className={`${inter.className} antialiased bg-[#232326] text-white`}>
         <Navigation />
         <main className="min-h-screen">{children}</main>
         <Footer />

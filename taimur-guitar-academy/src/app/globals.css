@@ -2,9 +2,9 @@
 
 :root {
   /* Neutrals */
-  --background: #F5F5F5;
-  --foreground: #2C2C2E;
-  --background-alt: #FFFFFF;
+  --background: #232326;
+  --foreground: #FFFFFF;
+  --background-alt: #18181A;
 
   /* Accents */
   --primary: #9CA3AF;  /* Light grey */
@@ -16,8 +16,8 @@
   --soft-pink: #F2888B;
 
   /* Old grays for compatibility */
-  --gray-light: #f5f5f5;
-  --gray-dark: #333333;
+  --gray-light: #232326;
+  --gray-dark: #FFFFFF;
 }
 
 @theme inline {
@@ -35,24 +35,14 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #18181A;
-    --foreground: #ededed;
-    --background-alt: #232326;
-    --gray-light: #232326;
-    --gray-dark: #e0e0e0;
-  }
-}
-
 body {
   background: linear-gradient(135deg, 
-    #F5F5F5 0%,
-    #F0E6E6 20%,
-    #F5E0E0 40%,
-    #F0D6D6 60%,
-    #F5E0E0 80%,
-    #F5F5F5 100%
+    #232326 0%,
+    #1E1E21 20%,
+    #232326 40%,
+    #1E1E21 60%,
+    #232326 80%,
+    #232326 100%
   ) !important;
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
