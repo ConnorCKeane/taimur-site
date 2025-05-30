@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React from 'react';
-import { Users2, Eye, Heart } from 'lucide-react';
+import { Users2, Eye, Heart, Instagram } from 'lucide-react';
 
 const partners = [
   {
@@ -35,12 +35,20 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
   return (
     <div className="flex justify-center w-full py-8">
       <div className="w-full max-w-3xl rounded-3xl bg-[#232326] bg-opacity-90 shadow-2xl px-0 pt-8 pb-10 flex flex-col items-center border border-white/10 overflow-hidden relative">
+        {/* Instagram Icon */}
+        <a
+          href="https://instagram.com/taimur"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-4 left-4 inline-flex items-center justify-center p-2 text-white hover:text-white/80 transition-all duration-300"
+        >
+          <Instagram className="w-7 h-7" />
+        </a>
         {/* Call to Action Above Carousel */}
         <div className="text-center mb-8">
           <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Become a Sponsor</h3>
           <p className="text-white/90 mb-5 max-w-lg mx-auto text-base font-medium">
             Put your product in front of thousands of passionate musicians and students.<br />
-
           </p>
           <button
             type="button"
@@ -83,18 +91,18 @@ export default function PartnersCarousel({ onContactClick }: PartnersCarouselPro
           </motion.div>
         </div>
         {/* Stats Row Below Carousel */}
-        <div className="w-full flex flex-row justify-center items-center gap-8 mt-10">
-          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
-            <Users2 className="w-5 h-5" />
-            160,000+ <span className="font-normal">followers</span>
+        <div className="w-full flex flex-row flex-wrap justify-center items-center gap-4 md:gap-8 mt-10">
+          <div className="flex items-center gap-1 md:gap-2 text-white/80 text-sm md:text-base font-semibold text-center">
+            <Users2 className="w-4 h-4 md:w-5 md:h-5" />
+            160k+ <span className="font-normal">followers</span>
           </div>
-          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
-            <Eye className="w-5 h-5" />
-            100,000,000+ <span className="font-normal">views</span>
+          <div className="flex items-center gap-1 md:gap-2 text-white/80 text-sm md:text-base font-semibold text-center">
+            <Eye className="w-4 h-4 md:w-5 md:h-5" />
+            100M+ <span className="font-normal">views</span>
           </div>
-          <div className="flex items-center gap-2 text-white/80 text-base font-semibold text-center">
-            <Heart className="w-5 h-5" />
-            45,000,000+ <span className="font-normal">likes</span>
+          <div className="flex items-center gap-1 md:gap-2 text-white/80 text-sm md:text-base font-semibold text-center">
+            <Heart className="w-4 h-4 md:w-5 md:h-5" />
+            45M+ <span className="font-normal">likes</span>
           </div>
         </div>
       </div>

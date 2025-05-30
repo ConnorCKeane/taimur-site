@@ -1,9 +1,8 @@
 'use client';
 
 // import { motion } from 'framer-motion';
-import { SpeakerWaveIcon, FilmIcon, AcademicCapIcon, MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { FilmIcon, AcademicCapIcon, MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { useRef } from 'react';
 
 const songs = [
   {
@@ -36,19 +35,6 @@ const songs = [
 ];
 
 export default function ShopPage() {
-  const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
-
-  const handlePlay = (idx: number) => {
-    audioRefs.current.forEach((audio, i) => {
-      if (audio && i !== idx) audio.pause();
-    });
-    const audio = audioRefs.current[idx];
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play();
-    }
-  };
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#E8E8E8] via-[#A4B8D8] via-[#8BA3C8] via-[#A4B8D8] to-[#E8E8E8]">
       <div className="max-w-5xl mx-auto px-4 pt-32 pb-32">
@@ -61,8 +47,8 @@ export default function ShopPage() {
           </p>
         </div>
         {/* Timeline Graphic: What to Expect */}
-        <div className="w-full overflow-x-auto mb-10">
-          <div className="flex flex-row gap-2 w-full min-w-0">
+        <div className="w-full mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
             {/* Intro & Song Overview */}
             <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
               <div className="flex items-center justify-center mb-1">
@@ -97,41 +83,29 @@ export default function ShopPage() {
             </div>
           </div>
         </div>
-        {/* Divider intentionally removed for a cleaner look */}
-        <div className="w-full overflow-x-auto mb-10">
-          <div className="flex flex-row gap-6 w-full min-w-0">
-            {songs.map((song, idx) => (
-              <div key={song.id} className="bg-[#232326] rounded-2xl shadow-xl border border-white/10 flex flex-row h-[140px] sm:h-[170px] min-w-[480px] max-w-lg overflow-hidden">
-                {/* Image on the left */}
-                <div className="relative h-full w-2/5 min-w-[140px] max-w-[200px]">
-                  <Image src={song.image} alt={song.title} fill className="object-cover h-full w-full rounded-l-2xl" style={{objectFit: 'cover', borderTopRightRadius: 0, borderBottomRightRadius: 0}} />
+        {/* Course Cards Grid */}
+        <div className="w-full mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {songs.map((song) => (
+              <div key={song.id} className="bg-[#232326] rounded-2xl shadow-md border border-white/10 flex flex-col overflow-hidden">
+                {/* Image on top */}
+                <div className="relative w-full h-40 bg-[#232326] flex items-center justify-center">
+                  <Image src={song.image} alt={song.title} fill className="object-contain p-6" />
                 </div>
-                {/* Content on the right */}
-                <div className="flex flex-col justify-center flex-1 p-4 gap-2">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex flex-col items-start">
-                      <h2 className="text-lg font-bold text-white leading-tight truncate">{song.title}</h2>
-                      <h3 className="text-sm text-gray-300 leading-tight m-0 truncate">by {song.artist}</h3>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-lg font-semibold text-white">${song.price.toFixed(2)}</span>
-                      <span className="text-gray-400 text-xs">/course</span>
-                    </div>
+                {/* Content below */}
+                <div className="flex flex-col gap-2 p-5 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-lg font-bold text-white leading-tight truncate mb-0">{song.title}</h2>
+                    <span className="text-sm text-gray-300 font-normal truncate">by {song.artist}</span>
                   </div>
-                  <div className="flex flex-row items-center gap-3 mt-2">
-                    <button
-                      className="flex items-center justify-center px-3 py-3 rounded-full bg-[#232326] text-white shadow hover:bg-gray-800 transition text-base"
-                      style={{ minWidth: 36, minHeight: 36 }}
-                      onClick={() => handlePlay(idx)}
-                      aria-label={`Play preview of ${song.title}`}
-                    >
-                      <SpeakerWaveIcon className="w-5 h-5" />
-                    </button>
-                    <audio ref={el => { audioRefs.current[idx] = el; }} src={song.audio} preload="none" />
-                    <button className="px-4 py-2 rounded-lg text-white font-semibold bg-transparent hover:bg-white/10 transition text-base" style={{ minWidth: 90 }}>
-                      Buy Now
-                    </button>
+                  <div className="text-xs text-white/80 mb-2">8 videos: step-by-step, close-up, play-along</div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-base font-semibold text-white">${song.price.toFixed(2)}</span>
+                    <span className="text-gray-400 text-xs">/course</span>
                   </div>
+                  <button className="mt-4 px-4 py-2 rounded-md text-white font-semibold bg-transparent border border-white shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:bg-white/10 transition text-base w-full">
+                    Buy Now
+                  </button>
                 </div>
               </div>
             ))}

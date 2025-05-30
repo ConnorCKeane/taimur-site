@@ -93,12 +93,12 @@ export default function LessonsPage() {
 
         {/* Lesson Features Grid */}
         <motion.div
-          className="py-2 w-full overflow-x-auto"
+          className="py-2 w-full"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <div className="flex flex-row gap-2 w-full min-w-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
             {/* Personalized Plan */}
             <div className="rounded-xl overflow-hidden py-1 px-2 flex flex-col items-center text-center min-w-0 flex-1 max-w-xs">
               <svg className="h-7 w-7 md:h-8 md:w-8 text-black mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
